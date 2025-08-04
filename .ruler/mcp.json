@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "."
+      ]
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y", 
+        "@modelcontextprotocol/server-git", 
+        "--repository", 
+        "."
+      ]
+    },
+    "Pieces": {
+      "url": "http://localhost:39300/model_context_protocol/2024-11-05/sse"
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y", 
+        "@upstash/context7-mcp"
+      ]
+    }
+  }
+}

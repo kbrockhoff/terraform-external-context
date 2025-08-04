@@ -1,0 +1,71 @@
+name: Documentation Issue
+description: Report an issue with documentation or suggest improvements
+title: "[DOCS] "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our documentation!
+        
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation issue is this?
+      options:
+        - "Missing documentation"
+        - "Incorrect or outdated information"
+        - "Unclear or confusing explanation"
+        - "Typo or formatting issue"
+        - "Missing examples"
+        - "Other"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: location
+    attributes:
+      label: Documentation Location
+      description: Where is the documentation issue located?
+      placeholder: |
+        - README.md
+        - Variable descriptions
+        - Output descriptions
+        - Examples
+        - Comments in code
+        - Other (please specify)
+    validations:
+      required: true
+      
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Issue Description
+      description: Describe the documentation issue in detail
+      placeholder: What's wrong with the current documentation?
+    validations:
+      required: true
+      
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current Content
+      description: If applicable, quote the current documentation that needs to be fixed
+      placeholder: Current documentation content...
+      
+  - type: textarea
+    id: suggested-improvement
+    attributes:
+      label: Suggested Improvement
+      description: How would you improve the documentation?
+      placeholder: Your suggested changes or additions...
+    validations:
+      required: true
+      
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context about the documentation issue
+      placeholder: Any additional information...

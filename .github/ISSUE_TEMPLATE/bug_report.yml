@@ -1,0 +1,127 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the bug...
+    validations:
+      required: true
+      
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear description of what you expected to happen.
+      placeholder: What should have happened?
+    validations:
+      required: true
+      
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: A clear description of what actually happened.
+      placeholder: What actually happened?
+    validations:
+      required: true
+      
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Run '...'
+        3. See error
+    validations:
+      required: true
+      
+  - type: textarea
+    id: terraform-config
+    attributes:
+      label: Terraform Configuration
+      description: Minimal Terraform configuration that reproduces the issue
+      render: hcl
+      placeholder: |
+        module "vpc" {
+          source = "..."
+          # configuration here
+        }
+    validations:
+      required: true
+      
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error Output
+      description: If applicable, add the full error output
+      render: shell
+      placeholder: Paste error output here...
+      
+  - type: input
+    id: terraform-version
+    attributes:
+      label: Terraform Version
+      description: What version of Terraform are you using?
+      placeholder: "1.5.0"
+    validations:
+      required: true
+      
+  - type: input
+    id: module-version
+    attributes:
+      label: Module Version
+      description: What version of this module are you using?
+      placeholder: "v1.0.0"
+    validations:
+      required: true
+      
+  - type: input
+    id: aws-provider-version
+    attributes:
+      label: AWS Provider Version
+      description: What version of the AWS provider are you using?
+      placeholder: "~> 5.0"
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: aws-region
+    attributes:
+      label: AWS Region
+      description: Which AWS region are you deploying to?
+      options:
+        - us-east-1
+        - us-east-2
+        - us-west-1
+        - us-west-2
+        - eu-west-1
+        - eu-west-2
+        - eu-west-3
+        - eu-central-1
+        - ap-northeast-1
+        - ap-northeast-2
+        - ap-southeast-1
+        - ap-southeast-2
+        - ap-south-1
+        - Other (please specify in additional context)
+    validations:
+      required: true
+      
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here, including screenshots if applicable
+      placeholder: Any additional information...

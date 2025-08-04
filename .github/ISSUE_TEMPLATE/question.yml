@@ -1,0 +1,67 @@
+name: Question
+description: Ask a question about usage, configuration, or best practices
+title: "[QUESTION] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your question! Please provide as much context as possible to help us assist you.
+        
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: Ask your question here...
+    validations:
+      required: true
+      
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to accomplish? What's your use case?
+      placeholder: Describe what you're trying to do...
+    validations:
+      required: true
+      
+  - type: textarea
+    id: current-config
+    attributes:
+      label: Current Configuration
+      description: If applicable, share your current Terraform configuration
+      render: hcl
+      placeholder: |
+        module "vpc" {
+          source = "..."
+          # your configuration
+        }
+        
+  - type: textarea
+    id: attempts
+    attributes:
+      label: What Have You Tried
+      description: What approaches have you already attempted?
+      placeholder: Describe what you've tried so far...
+      
+  - type: input
+    id: terraform-version
+    attributes:
+      label: Terraform Version
+      description: What version of Terraform are you using?
+      placeholder: "1.5.0"
+      
+  - type: input
+    id: module-version
+    attributes:
+      label: Module Version
+      description: What version of this module are you using?
+      placeholder: "v1.0.0"
+      
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context that might be helpful
+      placeholder: Any additional information...

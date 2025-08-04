@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Terraform Documentation
+    url: https://www.terraform.io/docs
+    about: Official Terraform documentation
+  - name: AWS Provider Documentation
+    url: https://registry.terraform.io/providers/hashicorp/aws/latest/docs
+    about: AWS Provider documentation and resources

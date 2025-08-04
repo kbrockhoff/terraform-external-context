@@ -1,0 +1,50 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Terraform files
+*.tf text eol=lf
+*.tfvars text eol=lf
+*.tpl text eol=lf
+
+# Markdown files
+*.md text eol=lf
+
+# YAML files
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# JSON files
+*.json text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Go files
+*.go text eol=lf
+*.mod text eol=lf
+*.sum text eol=lf
+
+# License and documentation
+LICENSE text eol=lf
+CHANGELOG text eol=lf
+CHANGELOG.md text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.tar.gz binary
+*.tgz binary
+
+# Ensure .terraform.lock.hcl uses LF endings
+.terraform.lock.hcl text eol=lf
+
+# Linguist overrides for proper language detection
+*.tf linguist-language=HCL
+*.tfvars linguist-language=HCL
+*.tpl linguist-language=HCL
