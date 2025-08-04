@@ -1,42 +1,8 @@
-# Brockhoff Cloud Terraform Module
+# Brockhoff Cloud Context Terraform Module
 
-> **📋 Template Setup Instructions**
->
-> After cloning this template repository, complete these setup steps:
->
-> 1. **Configure GitHub repository settings:**
->    - Under **Settings → Actions → General**
->      - Enable **Allow all actions and reusable workflows**
->      - Set **Workflow permissions** to "Read and write permissions"
->      - Enable **Workflow permissions** "Allow GitHub Actions to create and approve pull requests"
->
-> 2. **Configure repository secrets:**
->    - Under **Settings → Environments**
->      - Create `development` environment
->      - Add `AWS_ROLE_ARN` secret for GitHub Actions AWS access to your AWS development account
->    - Under **Settings → Secrets and variables → Actions → Repository secrets**
->      - Add `RELEASE_PLEASE_TOKEN` secret (Personal Access Token with repo permissions)
->    - For AWS authentication, ensure your IAM role has cross-account trust with GitHub OIDC
->
-> 3. **Configure main branch protection:**
->    - Under **Settings → Rules → Rulesets**
->      - Create new ruleset which applies to default branch and is set to Active
->      - Enable **Require a pull request before merging**
->      - Enable other rules as needed for your workflow
->
-> 4. **Replace placeholder text:**
->    - Find and replace all instances of `replace-me` with your actual module name
->    - Find and replace all instances of `replace` with appropriate values
->    - Update `CLOUD` and `XXX` placeholders with your target cloud provider and resources
->
-> 5. **Update module metadata:**
->    - Modify `locals.tf` → `ModuleName` to match your module using Terraform registry naming conventions
->    - Update repository URLs and documentation
->    - Customize examples and tests for your specific resources
-
-Terraform module which creates XXX resources on CLOUD. It takes an opinionated 
-approach to resource placement, naming, tagging, and well-architected best 
-practices.
+Terraform module which creates standardized resource name prefixes and tags/labels which conform with
+values expected by Brockhoff Terraform modules. It provides limited flexibility in adjusting tag/label
+names.
 
 ## Features
 
@@ -149,7 +115,7 @@ This eliminates the need to manage different subnet IDs variable values for each
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.6.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
 
 ## Modules
 
