@@ -1,14 +1,10 @@
-# CLOUD XXX Terraform Module Guide for AI Agents
+# Brockhof Cloud Context Terraform Module Guide for AI Agents
 
 What the goal of this module is.
 
 ## Components
 
-### Component 1
-- Requirement
-- Requirement
-
-### Component 2
-- Requirement
-- Requirement
-
+### Context
+- Provides name prefix standardization with output value named `named_prefix`
+- Provides standardized/consistent tags/labels with output values named `tags` and `data_tags`
+- Support AWS, Azure, and GCP naming and tagging conventions
