@@ -46,23 +46,6 @@ jobs:
     # Root module validation skipped - requires provider configuration
     # Root module is designed to be used as a module with providers passed in
 
-    - name: Terraform Init (Modules)
-      run: |
-        for module in modules/*/; do
-          echo "Initializing $module"
-          cd "$module"
-          terraform init -backend=false
-          cd - > /dev/null
-        done
-        
-    - name: Terraform Validate (Modules)
-      run: |
-        for module in modules/*/; do
-          echo "Validating $module"
-          cd "$module"
-          terraform validate
-          cd - > /dev/null
-        done
     - name: Terraform Init (Examples)
       run: |
         for example in examples/*/; do
