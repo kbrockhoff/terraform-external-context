@@ -3,12 +3,8 @@ terraform {
 
   required_providers {
     external = {
-      source                = "hashicorp/external"
-      version               = ">= 2.0"
+      source  = "hashicorp/external"
+      version = ">= 2.3"
     }
   }
-}
-
-locals {
-  module_version = "v0.0.0"
 }

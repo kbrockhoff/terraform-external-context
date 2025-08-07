@@ -12,23 +12,25 @@ provider "aws" {
 module "main" {
   source = "../../"
 
-  providers = {
-    aws         = aws
-    aws.pricing = aws.pricing
-  }
-
-  enabled                      = var.enabled
-  name_prefix                  = var.name_prefix
-  tags                         = var.tags
-  data_tags                    = var.data_tags
-  environment_type             = var.environment_type
-  cost_estimation_enabled      = var.cost_estimation_enabled
-  networktags_name             = var.networktags_name
-  create_kms_key               = var.create_kms_key
-  kms_key_id                   = var.kms_key_id
-  kms_key_deletion_window_days = var.kms_key_deletion_window_days
-  monitoring_enabled           = var.monitoring_enabled
-  alarms_enabled               = var.alarms_enabled
-  create_alarm_sns_topic       = var.create_alarm_sns_topic
-  alarm_sns_topic_arn          = var.alarm_sns_topic_arn
+  enabled              = var.enabled
+  environment_type     = var.environment_type
+  cloud_provider       = var.cloud_provider
+  namespace            = var.namespace
+  name                 = var.name
+  environment          = var.environment
+  environment_name     = var.environment_name
+  cost_center          = var.cost_center
+  project              = var.project
+  project_owners       = var.project_owners
+  code_owners          = var.code_owners
+  data_owners          = var.data_owners
+  availability         = var.availability
+  deployer             = var.deployer
+  deletion_date        = var.deletion_date
+  confidentiality      = var.confidentiality
+  data_regs            = var.data_regs
+  security_review      = var.security_review
+  privacy_review       = var.privacy_review
+  additional_tags      = var.additional_tags
+  additional_data_tags = var.additional_data_tags
 }
