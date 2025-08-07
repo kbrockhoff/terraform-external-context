@@ -2,16 +2,19 @@ enabled          = true
 environment_type = "None"
 
 # Core identification
-cloud_provider   = "aws"
-namespace        = "ck"
-name             = "complete"
-environment      = "dev"
-environment_name = "Development"
+cloud_provider    = "aws"
+namespace         = "ck"
+name              = "complete"
+environment       = "dev"
+environment_name  = "Development"
+tag_prefix        = "ck-"
+itsm_platform     = "JIRA"
+itsm_project_code = "TF"
 
 # Ownership and governance
 cost_center    = "12345"
-project        = "terraform-context"
-project_owners = ["finance@example.com"]
+product        = "terraform-context"
+product_owners = ["finance@example.com"]
 code_owners    = ["devops@example.com", "platform@example.com"]
 data_owners    = ["data-governance@example.com"]
 
@@ -35,3 +38,5 @@ additional_data_tags = {
   "DataClassification" = "Confidential"
   "RetentionPeriod"    = "7years"
 }
+
+source_repo_tags_enabled = true

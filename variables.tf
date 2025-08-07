@@ -8,27 +8,31 @@ variable "context" {
   EOT
   type        = any
   default = {
-    enabled              = true
-    environment_type     = "Development"
-    cloud_provider       = "dc"
-    namespace            = null
-    name                 = null
-    environment          = null
-    environment_name     = null
-    cost_center          = null
-    project              = null
-    project_owners       = []
-    code_owners          = []
-    data_owners          = []
-    availability         = "preemptable"
-    deployer             = "Terraform"
-    deletion_date        = null
-    confidentiality      = "confidential"
-    data_regs            = []
-    security_review      = null
-    privacy_review       = null
-    additional_tags      = {}
-    additional_data_tags = {}
+    enabled                  = true
+    environment_type         = "Development"
+    cloud_provider           = "dc"
+    namespace                = null
+    name                     = null
+    environment              = null
+    environment_name         = null
+    tag_prefix               = "ck-"
+    itsm_platform            = null
+    itsm_project_code        = null
+    cost_center              = null
+    product                  = null
+    product_owners           = []
+    code_owners              = []
+    data_owners              = []
+    availability             = "preemptable"
+    deployer                 = "Terraform"
+    deletion_date            = null
+    confidentiality          = "confidential"
+    data_regs                = []
+    security_review          = null
+    privacy_review           = null
+    additional_tags          = {}
+    additional_data_tags     = {}
+    source_repo_tags_enabled = true
   }
 
   validation {
@@ -111,19 +115,37 @@ variable "environment_name" {
   default     = null
 }
 
+variable "tag_prefix" {
+  description = "Prefix for standardized tags"
+  type        = string
+  default     = "ck-"
+}
+
+variable "itsm_platform" {
+  description = "System for ticketing (i.e. JIRA, SNOW)."
+  type        = string
+  default     = null
+}
+
+variable "itsm_project_code" {
+  description = "The prefix used on your ITSM Platform tickets."
+  type        = string
+  default     = null
+}
+
 variable "cost_center" {
   description = "Cost center this resource should be billed to."
   type        = string
   default     = null
 }
 
-variable "project" {
+variable "product" {
   description = "Identifier for the product or project which created or owns this resource."
   type        = string
   default     = null
 }
 
-variable "project_owners" {
+variable "product_owners" {
   description = "List of email addresses to contact with billing questions."
   type        = list(string)
   default     = null
@@ -211,4 +233,10 @@ variable "additional_data_tags" {
   description = "Additional data tags for resources with data at rest (e.g. `map('DataClassification','Confidential')`"
   type        = map(string)
   default     = {}
+}
+
+variable "source_repo_tags_enabled" {
+  description = "Enable source repository tags"
+  type        = bool
+  default     = true
 }

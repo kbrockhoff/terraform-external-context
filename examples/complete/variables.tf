@@ -71,19 +71,37 @@ variable "environment_name" {
   default     = null
 }
 
+variable "tag_prefix" {
+  description = "Prefix for standardized tags"
+  type        = string
+  default     = "ck-"
+}
+
+variable "itsm_platform" {
+  description = "System for ticketing (i.e. JIRA, SNOW)."
+  type        = string
+  default     = null
+}
+
+variable "itsm_project_code" {
+  description = "The prefix used on your ITSM Platform tickets."
+  type        = string
+  default     = null
+}
+
 variable "cost_center" {
   description = "Cost center this resource should be billed to."
   type        = string
   default     = null
 }
 
-variable "project" {
+variable "product" {
   description = "Identifier for the product or project which created or owns this resource."
   type        = string
   default     = null
 }
 
-variable "project_owners" {
+variable "product_owners" {
   description = "List of email addresses to contact with billing questions."
   type        = list(string)
   default     = null
@@ -171,4 +189,10 @@ variable "additional_data_tags" {
   description = "Additional data tags for resources with data at rest (e.g. `map('DataClassification','Confidential')`"
   type        = map(string)
   default     = {}
+}
+
+variable "source_repo_tags_enabled" {
+  description = "Enable source repository tags"
+  type        = bool
+  default     = true
 }

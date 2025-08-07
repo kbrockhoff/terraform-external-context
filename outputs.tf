@@ -3,6 +3,11 @@ output "name_prefix" {
   value       = local.enabled ? local.name_prefix : ""
 }
 
+output "environment_type" {
+  description = "Environment type for resource configuration defaults."
+  value       = local.input.environment_type
+}
+
 output "tags" {
   description = "Normalized tags map."
   value       = local.enabled ? local.tags : {}
@@ -13,10 +18,6 @@ output "data_tags" {
   value       = local.enabled ? local.data_tags : {}
 }
 
-output "tags_with_name" {
-  description = "normalized tag map including Name tag."
-  value       = local.enabled ? local.tags_all : {}
-}
 
 output "tags_as_list_of_maps" {
   description = "Additional tags as a list of maps, which can be used in several AWS resources."
