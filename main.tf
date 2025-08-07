@@ -124,14 +124,13 @@ locals {
       ) : (
       local.cstr["not_applicable"]
     )
-    "${local.tag_prefix}itsmid"          = local.itsm_info
-    "${local.tag_prefix}environment"     = local.env_name
-    "${local.tag_prefix}availability"    = local.availability
-    "${local.tag_prefix}deployer"        = local.deployer
-    "${local.tag_prefix}deletiondate"    = local.delete_dt
-    "${local.tag_prefix}confidentiality" = local.confidentiality
-    "${local.tag_prefix}securityreview"  = local.input.security_review == null ? local.cstr["not_applicable"] : local.input.security_review
-    "${local.tag_prefix}privacyreview"   = local.input.privacy_review == null ? local.cstr["not_applicable"] : local.input.privacy_review
+    "${local.tag_prefix}itsmid"         = local.itsm_info
+    "${local.tag_prefix}environment"    = local.env_name
+    "${local.tag_prefix}availability"   = local.availability
+    "${local.tag_prefix}deployer"       = local.deployer
+    "${local.tag_prefix}deletiondate"   = local.delete_dt
+    "${local.tag_prefix}securityreview" = local.input.security_review == null ? local.cstr["not_applicable"] : local.input.security_review
+    "${local.tag_prefix}privacyreview"  = local.input.privacy_review == null ? local.cstr["not_applicable"] : local.input.privacy_review
     }, local.input.source_repo_tags_enabled ? {
     "${local.tag_prefix}sourcerepo" = local.source_repo
   } : {}, local.input.additional_tags)
@@ -153,6 +152,7 @@ locals {
 
   # Data tags include data-specific tags plus additional data tags
   raw_data_tags = merge({
+    "${local.tag_prefix}confidentiality" = local.confidentiality
     "${local.tag_prefix}dataowners" = length(local.input.data_owners) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.data_owners)
       ) : (
