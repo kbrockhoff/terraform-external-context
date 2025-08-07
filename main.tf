@@ -69,10 +69,13 @@ locals {
 
   cstr = merge(local.default_constraints, lookup(local.cp_constraints_map, local.input.cloud_provider, {}))
 
-  env        = local.input.environment
-  env_name   = local.input.environment_name == null ? local.env : local.input.environment_name
-  enabled    = local.input.enabled == null ? true : local.input.enabled
-  tag_prefix = local.input.tag_prefix == null ? "" : local.input.tag_prefix
+  env             = local.input.environment == null ? "dev" : local.input.environment
+  env_name        = local.input.environment_name == null ? local.env : local.input.environment_name
+  enabled         = local.input.enabled == null ? true : local.input.enabled
+  tag_prefix      = local.input.tag_prefix == null ? "" : local.input.tag_prefix
+  availability    = local.input.availability == null ? "preemptable" : local.input.availability
+  confidentiality = local.input.confidentiality == null ? "confidential" : local.input.confidentiality
+  deployer        = local.input.deployer == null ? "terraform" : local.input.deployer
 
   # Combine ITSM platform and project code
   itsm_info = local.input.itsm_platform == null && local.input.itsm_project_code == null ? (
@@ -123,10 +126,10 @@ locals {
     )
     "${local.tag_prefix}itsmid"          = local.itsm_info
     "${local.tag_prefix}environment"     = local.env_name
-    "${local.tag_prefix}availability"    = local.input.availability
-    "${local.tag_prefix}deployer"        = local.input.deployer
+    "${local.tag_prefix}availability"    = local.availability
+    "${local.tag_prefix}deployer"        = local.deployer
     "${local.tag_prefix}deletiondate"    = local.delete_dt
-    "${local.tag_prefix}confidentiality" = local.input.confidentiality
+    "${local.tag_prefix}confidentiality" = local.confidentiality
     "${local.tag_prefix}securityreview"  = local.input.security_review == null ? local.cstr["not_applicable"] : local.input.security_review
     "${local.tag_prefix}privacyreview"   = local.input.privacy_review == null ? local.cstr["not_applicable"] : local.input.privacy_review
     }, local.input.source_repo_tags_enabled ? {
@@ -197,9 +200,9 @@ locals {
     name_prefix              = local.name_prefix
     namespace                = local.input.namespace
     name                     = local.input.name
-    environment              = local.input.environment
-    environment_name         = local.input.environment_name
-    tag_prefix               = local.input.tag_prefix
+    environment              = local.env
+    environment_name         = local.env_name
+    tag_prefix               = local.tag_prefix
     itsm_platform            = local.input.itsm_platform
     itsm_project_code        = local.input.itsm_project_code
     cost_center              = local.input.cost_center
@@ -207,10 +210,10 @@ locals {
     product_owners           = local.input.product_owners
     code_owners              = local.input.code_owners
     data_owners              = local.input.data_owners
-    availability             = local.input.availability
-    deployer                 = local.input.deployer
-    deletion_date            = local.input.deletion_date
-    confidentiality          = local.input.confidentiality
+    availability             = local.availability
+    deployer                 = local.deployer
+    deletion_date            = local.delete_dt
+    confidentiality          = local.confidentiality
     data_regs                = local.input.data_regs
     security_review          = local.input.security_review
     privacy_review           = local.input.privacy_review

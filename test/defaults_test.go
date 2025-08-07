@@ -19,7 +19,7 @@ func TestTerraformDefaultsExample(t *testing.T) {
 
 		// Variables to pass to our Terraform code using -var options
 		Vars: map[string]interface{}{
-			"name_prefix": expectedName,
+			"name": expectedName,
 		},
 
 		// Environment variables to set when running Terraform
@@ -33,18 +33,14 @@ func TestTerraformDefaultsExample(t *testing.T) {
 	terraform.Init(t, terraformOptions)
 	planOutput := terraform.Plan(t, terraformOptions)
 
-	// Verify the plan completed without errors and shows expected resource creation
+	// Verify the plan completed without errors and shows no infrastructure changes
 	assert.NotEmpty(t, planOutput)
 	
-	// Verify core KMS resources are planned for creation
-	assert.Contains(t, planOutput, "module.main.aws_kms_key.main[0]")
-	assert.Contains(t, planOutput, "module.main.aws_kms_alias.main[0]")
-	assert.Contains(t, planOutput, "will be created")
+	// Context module should not create any infrastructure resources
+	assert.Contains(t, planOutput, "No changes")
 	
-	// Verify SNS topic is NOT created by default (alarms_enabled=false)
-	assert.NotContains(t, planOutput, "module.main.aws_sns_topic.alarms")
-	
-	// Verify expected resource count (2 resources: KMS key + alias)
-	assert.Contains(t, planOutput, "2 to add, 0 to change, 0 to destroy")
+	// Plan output should show the computed outputs even without apply
+	// Since this is a data-only module, we can validate the plan shows our expected data sources
+	assert.Contains(t, planOutput, "data.external.git_repo[0]")
 
 }
