@@ -83,6 +83,11 @@ test-enabled-false:  ## Run only enabled=false test
 	@cd test && go test -v -timeout 15m -run TestEnabledFalse
 	@echo "$(GREEN)✓ Enabled=false test passed$(RESET)"
 
+test-subcontext:  ## Run only subcontext example test
+	@echo "$(CYAN)Running subcontext test...$(RESET)"
+	@cd test && go test -v -timeout 15m -run TestTerraformSubcontextExample
+	@echo "$(GREEN)✓ Subcontext test passed$(RESET)"
+
 ##@ Documentation
 docs: ## Generate documentation
 	@echo "$(CYAN)Generating documentation...$(RESET)"
@@ -210,6 +215,7 @@ verify-tests: ## Verify test structure and names
 	@echo "  - TestTerraformDefaultsExample"
 	@echo "  - TestTerraformCompleteExample" 
 	@echo "  - TestEnabledFalse"
+	@echo "  - TestTerraformSubcontextExample"
 
 ##@ Development
 all: clean validate test docs ## Run complete development workflow
