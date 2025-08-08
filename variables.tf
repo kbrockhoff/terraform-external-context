@@ -230,7 +230,13 @@ variable "additional_tags" {
 }
 
 variable "additional_data_tags" {
-  description = "Additional data tags for resources with data at rest (e.g. `map('DataClassification','Confidential')`"
+  description = "Additional tags (e.g. `map('BusinessUnit','XYZ')`)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "additional_data_tags" {
+  description = "Additional data tags for resources with data at rest (e.g. `map('DataClassification','Confidential')`)"
   type        = map(string)
   default     = {}
 }
