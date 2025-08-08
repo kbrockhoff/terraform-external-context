@@ -192,6 +192,19 @@ locals {
   tags_as_kvp_list               = [for k, v in local.tags : format("%s=%s", k, v)]
   tags_as_comma_separated_string = join(",", local.tags_as_kvp_list)
 
+  # Data tags transformations
+  data_tags_as_list_of_maps = flatten([
+    for key in keys(local.data_tags) : merge(
+      {
+        key                 = key
+        value               = local.data_tags[key]
+        propagate_at_launch = "true"
+    })
+  ])
+
+  data_tags_as_kvp_list               = [for k, v in local.data_tags : format("%s=%s", k, v)]
+  data_tags_as_comma_separated_string = join(",", local.data_tags_as_kvp_list)
+
   # Merging of inputs from parent context, if supplied, and this context's overrides
   output_context = {
     enabled                  = local.enabled

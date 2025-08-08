@@ -163,11 +163,15 @@ No modules.
 |------|-------------|
 | <a name="output_context"></a> [context](#output\_context) | Merged but otherwise unmodified input to this module, to be used as context input to other modules. |
 | <a name="output_data_tags"></a> [data\_tags](#output\_data\_tags) | Normalized data tags map. |
+| <a name="output_data_tags_as_comma_separated_string"></a> [data\_tags\_as\_comma\_separated\_string](#output\_data\_tags\_as\_comma\_separated\_string) | Data tags as a comma-separated string, which can be used by command line tools. |
+| <a name="output_data_tags_as_kvp_list"></a> [data\_tags\_as\_kvp\_list](#output\_data\_tags\_as\_kvp\_list) | Data tags as a list of key=value pairs. |
+| <a name="output_data_tags_as_list_of_maps"></a> [data\_tags\_as\_list\_of\_maps](#output\_data\_tags\_as\_list\_of\_maps) | Additional data tags as a list of maps, which can be used in several AWS resources. |
 | <a name="output_environment_type"></a> [environment\_type](#output\_environment\_type) | Environment type for resource configuration defaults. |
 | <a name="output_name_prefix"></a> [name\_prefix](#output\_name\_prefix) | Disambiguated ID or name prefix for resources in the context. |
 | <a name="output_normalized_context"></a> [normalized\_context](#output\_normalized\_context) | Normalized context of this module. |
 | <a name="output_tags"></a> [tags](#output\_tags) | Normalized tags map. |
 | <a name="output_tags_as_comma_separated_string"></a> [tags\_as\_comma\_separated\_string](#output\_tags\_as\_comma\_separated\_string) | Tags as a comma-separated string, which can be used by command line tools. |
+| <a name="output_tags_as_kvp_list"></a> [tags\_as\_kvp\_list](#output\_tags\_as\_kvp\_list) | Tags as a list of key=value pairs. |
 | <a name="output_tags_as_list_of_maps"></a> [tags\_as\_list\_of\_maps](#output\_tags\_as\_list\_of\_maps) | Additional tags as a list of maps, which can be used in several AWS resources. |
 <!-- END_TF_DOCS -->    
 
