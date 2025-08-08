@@ -2,7 +2,6 @@ locals {
   default_constraints = {
     id_replace_chars  = "/[^a-z0-9_-]/"
     id_delimiter      = "-"
-    id_length_limit   = 63
     tag_lowercase     = false
     tag_replace_chars = "/[<>%&\\?]/"
     tag_replacement   = "_"
