@@ -81,7 +81,7 @@ locals {
   )
 
   # Source repository URL processing
-  source_repo_raw = local.input.source_repo_tags_enabled ? trimsuffix(data.external.git_repo[0].result["url"], ".git") : ""
+  source_repo_raw = local.input.source_repo_tags_enabled ? try(trimsuffix(data.external.git_repo[0].result["url"], ".git"), "") : ""
   source_repo = local.input.source_repo_tags_enabled ? (
     startswith(local.source_repo_raw, "git@") ? (
       replace(replace(local.source_repo_raw, ":", "/"), "git@", "https://")
