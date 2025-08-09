@@ -120,7 +120,10 @@ locals {
     )
   )
 
-  sandbox_dt = local.input.environment_type == "Ephemeral" ? formatdate("YYYY-MM-DD", timeadd(timestamp(), "2160h")) : "never"
+  # Number of hours to retain ephemeral sandboxes (90 days)
+  sandbox_retention_hours = "2160h"
+
+  sandbox_dt = local.input.environment_type == "Ephemeral" ? formatdate("YYYY-MM-DD", timeadd(timestamp(), local.sandbox_retention_hours)) : "never"
   delete_dt  = local.input.deletion_date == null ? local.sandbox_dt : local.input.deletion_date
 
   raw_tags = merge({
