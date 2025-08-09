@@ -16,7 +16,7 @@ module "primary_context" {
   code_owners      = ["platform-team"]
   data_owners      = ["data-team"]
   availability     = "always_on"
-  confidentiality  = "confidential"
+  sensitivity      = "confidential"
   data_regs        = ["gdpr", "ccpa"]
   security_review  = "passed"
   privacy_review   = "passed"

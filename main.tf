@@ -54,7 +54,7 @@ locals {
     availability             = var.availability == null ? var.context.availability : var.availability
     deployer                 = var.deployer == null ? var.context.deployer : var.deployer
     deletion_date            = var.deletion_date == null ? var.context.deletion_date : var.deletion_date
-    confidentiality          = var.confidentiality == null ? var.context.confidentiality : var.confidentiality
+    sensitivity              = var.sensitivity == null ? var.context.sensitivity : var.sensitivity
     data_regs                = var.data_regs == null ? var.context.data_regs : var.data_regs
     security_review          = var.security_review == null ? var.context.security_review : var.security_review
     privacy_review           = var.privacy_review == null ? var.context.privacy_review : var.privacy_review
@@ -65,13 +65,13 @@ locals {
 
   cstr = merge(local.default_constraints, lookup(local.cp_constraints_map, local.input.cloud_provider, {}))
 
-  env             = local.input.environment == null ? "dev" : local.input.environment
-  env_name        = local.input.environment_name == null ? local.env : local.input.environment_name
-  enabled         = local.input.enabled == null ? true : local.input.enabled
-  tag_prefix      = local.input.tag_prefix == null ? "" : local.input.tag_prefix
-  availability    = local.input.availability == null ? "preemptable" : local.input.availability
-  confidentiality = local.input.confidentiality == null ? "confidential" : local.input.confidentiality
-  deployer        = local.input.deployer == null ? "terraform" : local.input.deployer
+  env          = local.input.environment == null ? "dev" : local.input.environment
+  env_name     = local.input.environment_name == null ? local.env : local.input.environment_name
+  enabled      = local.input.enabled == null ? true : local.input.enabled
+  tag_prefix   = local.input.tag_prefix == null ? "" : local.input.tag_prefix
+  availability = local.input.availability == null ? "preemptable" : local.input.availability
+  sensitivity  = local.input.sensitivity == null ? "confidential" : local.input.sensitivity
+  deployer     = local.input.deployer == null ? "terraform" : local.input.deployer
 
   # Combine ITSM platform and project code
   itsm_info = local.input.itsm_platform == null && local.input.itsm_project_code == null ? (
@@ -93,7 +93,7 @@ locals {
   # Name prefix generation logic following Brockhoff standards
   # Rule 1: If namespace, name, and environment are provided, join with hyphens in order: namespace-name-environment
   # Rule 2: If only name is provided (namespace and environment are null/empty), use name only
-  # Rule 3: If the combined prefix exceeds 16 characters, truncate the name component to fit
+  # Rule 3: If the combined prefix exceeds 24 characters, truncate the name component to fit
 
   # Calculate raw name prefix first
   raw_name_prefix = local.input.namespace == null || local.input.environment == null ? (
@@ -105,26 +105,19 @@ locals {
   # Helper calculations for name truncation
   namespace_len      = local.input.namespace != null ? length(local.input.namespace) : 0
   environment_len    = local.input.environment != null ? length(local.input.environment) : 0
-  available_name_len = 16 - local.namespace_len - local.environment_len - 2
+  available_name_len = 24 - local.namespace_len - local.environment_len - 2
   truncated_name_len = max(1, local.available_name_len)
   truncated_name     = substr(local.input.name, 0, local.truncated_name_len)
 
-  # Truncate if necessary to fit within 16 character limit
-  name_prefix = length(local.raw_name_prefix) <= 16 ? local.raw_name_prefix : (
+  # Truncate if necessary to fit within 24 character limit
+  name_prefix = length(local.raw_name_prefix) <= 24 ? local.raw_name_prefix : (
     local.input.namespace == null || local.input.environment == null ? (
-      # If no namespace/environment, truncate name to 16 chars
-      substr(local.input.name, 0, 16)
+      # If no namespace/environment, truncate name to 24 chars
+      substr(local.input.name, 0, 24)
       ) : (
       # Use calculated values to create truncated prefix
       lower(join("-", [local.input.namespace, local.truncated_name, local.input.environment]))
     )
-  )
-
-  # Validation: name_prefix must match /^[a-z][a-z0-9-]{0,14}[a-z0-9]$/
-  name_prefix_validation = (
-    can(regex("^[a-z][a-z0-9-]{0,14}[a-z0-9]$", local.name_prefix)) ?
-    null :
-    tobool("ERROR: name_prefix '${local.name_prefix}' does not match required pattern /^[a-z][a-z0-9-]{0,14}[a-z0-9]$/. Must be 2-16 characters, start with lowercase letter, contain only lowercase letters, numbers, and hyphens, and end with alphanumeric character.")
   )
 
   sandbox_dt = local.input.environment_type == "Ephemeral" ? formatdate("YYYY-MM-DD", timeadd(timestamp(), "2160h")) : "never"
@@ -171,7 +164,7 @@ locals {
 
   # Data tags include data-specific tags plus additional data tags
   raw_data_tags = merge({
-    "${local.tag_prefix}confidentiality" = local.confidentiality
+    "${local.tag_prefix}sensitivity" = local.sensitivity
     "${local.tag_prefix}dataowners" = length(local.input.data_owners) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.data_owners)
       ) : (
@@ -245,7 +238,7 @@ locals {
     availability             = local.availability
     deployer                 = local.deployer
     deletion_date            = local.delete_dt
-    confidentiality          = local.confidentiality
+    sensitivity              = local.sensitivity
     data_regs                = local.input.data_regs
     security_review          = local.input.security_review
     privacy_review           = local.input.privacy_review

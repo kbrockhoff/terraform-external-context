@@ -4,8 +4,8 @@ variable "namespace" {
   default     = "ck"
 
   validation {
-    condition     = can(regex("^[a-z][a-z0-9-]{1,15}$", var.namespace))
-    error_message = "Namespace must be 2-16 characters, lowercase, start with letter."
+    condition     = can(regex("^[a-z][a-z0-9-]{1,23}$", var.namespace))
+    error_message = "Namespace must be 2-24 characters, lowercase, start with letter."
   }
 }
 
@@ -15,8 +15,8 @@ variable "name" {
   default     = "multi"
 
   validation {
-    condition     = can(regex("^[a-z][a-z0-9-]{1,15}$", var.name))
-    error_message = "Name must be 2-16 characters, lowercase, start with letter."
+    condition     = can(regex("^[a-z][a-z0-9-]{1,23}$", var.name))
+    error_message = "Name must be 2-24 characters, lowercase, start with letter."
   }
 }
 
@@ -26,8 +26,8 @@ variable "environment" {
   default     = "qaprim"
 
   validation {
-    condition     = can(regex("^[a-z][a-z0-9-]{1,15}$", var.environment))
-    error_message = "Environment must be 2-16 characters, lowercase, start with letter."
+    condition     = can(regex("^[a-z][a-z0-9-]{1,23}$", var.environment))
+    error_message = "Environment must be 2-24 characters, lowercase, start with letter."
   }
 }
 

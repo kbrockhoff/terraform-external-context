@@ -19,7 +19,7 @@ module "main" {
   availability             = var.availability
   deployer                 = var.deployer
   deletion_date            = var.deletion_date
-  confidentiality          = var.confidentiality
+  sensitivity              = var.sensitivity
   data_regs                = var.data_regs
   security_review          = var.security_review
   privacy_review           = var.privacy_review

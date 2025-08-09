@@ -49,8 +49,8 @@ variable "name" {
   default     = null
 
   validation {
-    condition     = var.name == null ? true : can(regex("^[a-z][a-z0-9-]{0,14}[a-z0-9]$", var.name))
-    error_message = "The name value must start with a lowercase letter, followed by 1 to 15 alphanumeric or hyphen characters, for a total length of 2 to 16 characters."
+    condition     = var.name == null ? true : can(regex("^[a-z][a-z0-9-]{0,22}[a-z0-9]$", var.name))
+    error_message = "The name value must start with a lowercase letter, followed by 1 to 23 alphanumeric or hyphen characters, for a total length of 2 to 24 characters."
   }
 }
 
@@ -146,18 +146,18 @@ variable "deletion_date" {
   default     = null
 }
 
-variable "confidentiality" {
-  description = "Standard name from enumerated list for data confidentiality. (public, confidential, client, private)"
+variable "sensitivity" {
+  description = "Standard name from enumerated list for data sensitivity. (public, internal, trusted-3rd-party, confidential, highly-confidential, client-classified)"
   type        = string
   default     = null
 
   validation {
-    condition = var.confidentiality == null ? (
+    condition = var.sensitivity == null ? (
       true
       ) : (
-      contains(["public", "confidential", "client", "private"], var.confidentiality)
+      contains(["public", "internal", "trusted-3rd-party", "confidential", "highly-confidential", "client-classified"], var.sensitivity)
     )
-    error_message = "Allowed values: `public`, `confidential`, `client`, `private`."
+    error_message = "Allowed values: `public`, `internal`, `trusted-3rd-party`, `confidential`, `highly-confidential`, `client-classified`."
   }
 }
 

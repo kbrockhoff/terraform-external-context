@@ -26,7 +26,7 @@ variable "context" {
     availability             = "preemptable"
     deployer                 = "Terraform"
     deletion_date            = null
-    confidentiality          = "confidential"
+    sensitivity              = "confidential"
     data_regs                = []
     security_review          = null
     privacy_review           = null
@@ -38,6 +38,52 @@ variable "context" {
   validation {
     condition     = contains(["dc", "aws", "az", "gcp", "oci", "ibm", "do", "vul", "ali", "cv"], var.context.cloud_provider)
     error_message = "Allowed values: `dc`, `aws`, `az`, `gcp`, `oci`, `ibm`, `do`, `vul`, `ali`, `cv`."
+  }
+
+  validation {
+    condition = contains([
+      "None", "Ephemeral", "Development", "Testing", "UAT", "Production", "MissionCritical"
+    ], var.context.environment_type)
+    error_message = "Environment type must be one of: None, Ephemeral, Development, Testing, UAT, Production, MissionCritical."
+  }
+
+  validation {
+    condition     = var.context.namespace == null ? true : can(regex("^[a-z][a-z0-9-]{0,6}[a-z0-9]?$", var.context.namespace))
+    error_message = "Must be between 1 and 8 characters in length."
+  }
+
+  validation {
+    condition = var.context.name == null ? true : (
+      var.context.namespace == null || var.context.environment == null ? (
+        can(regex("^[a-z][a-z0-9-]{0,22}[a-z0-9]$", var.context.name))
+        ) : (
+        can(regex("^[a-z][a-z0-9-]{0,22}[a-z0-9]$", lower(join("-", [var.context.namespace, var.context.name, var.context.environment]))))
+      )
+    )
+    error_message = "The resulting name_prefix must match pattern /^[a-z][a-z0-9-]{0,22}[a-z0-9]$/. Must be 2-24 characters total, start with lowercase letter, contain only lowercase letters, numbers, and hyphens, and end with alphanumeric character."
+  }
+
+  validation {
+    condition     = var.context.environment == null ? true : can(regex("^[a-z][a-z0-9-]{0,6}[a-z0-9]?$", var.context.environment))
+    error_message = "Must be between 1 and 8 characters in length."
+  }
+
+  validation {
+    condition = var.context.availability == null ? (
+      true
+      ) : (
+      contains(["always_on", "business_hours", "preemptable"], var.context.availability)
+    )
+    error_message = "Allowed values: `always_on`, `business_hours`, `preemptable`."
+  }
+
+  validation {
+    condition = var.context.sensitivity == null ? (
+      true
+      ) : (
+      contains(["public", "internal", "trusted-3rd-party", "confidential", "highly-confidential", "client-classified"], var.context.sensitivity)
+    )
+    error_message = "Allowed values: `public`, `internal`, `trusted-3rd-party`, `confidential`, `highly-confidential`, `client-classified`."
   }
 }
 
@@ -92,8 +138,14 @@ variable "name" {
   default     = null
 
   validation {
-    condition     = var.name == null ? true : can(regex("^[a-z][a-z0-9-]{0,14}[a-z0-9]$", var.name))
-    error_message = "The name value must start with a lowercase letter, followed by 1 to 15 alphanumeric or hyphen characters, for a total length of 2 to 16 characters."
+    condition = var.name == null ? true : (
+      var.namespace == null || var.environment == null ? (
+        can(regex("^[a-z][a-z0-9-]{0,22}[a-z0-9]$", var.name))
+        ) : (
+        can(regex("^[a-z][a-z0-9-]{0,22}[a-z0-9]$", lower(join("-", [var.namespace, var.name, var.environment]))))
+      )
+    )
+    error_message = "The resulting name_prefix must match pattern /^[a-z][a-z0-9-]{0,22}[a-z0-9]$/. Must be 2-24 characters total, start with lowercase letter, contain only lowercase letters, numbers, and hyphens, and end with alphanumeric character."
   }
 }
 
@@ -190,18 +242,18 @@ variable "deletion_date" {
   default     = null
 }
 
-variable "confidentiality" {
-  description = "Standard name from enumerated list for data confidentiality. (public, confidential, client, private)"
+variable "sensitivity" {
+  description = "Standard name from enumerated list for data sensitivity. (public, internal, trusted-3rd-party, confidential, highly-confidential, client-classified)"
   type        = string
   default     = null
 
   validation {
-    condition = var.confidentiality == null ? (
+    condition = var.sensitivity == null ? (
       true
       ) : (
-      contains(["public", "confidential", "client", "private"], var.confidentiality)
+      contains(["public", "internal", "trusted-3rd-party", "confidential", "highly-confidential", "client-classified"], var.sensitivity)
     )
-    error_message = "Allowed values: `public`, `confidential`, `client`, `private`."
+    error_message = "Allowed values: `public`, `internal`, `trusted-3rd-party`, `confidential`, `highly-confidential`, `client-classified`."
   }
 }
 
