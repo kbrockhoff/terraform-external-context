@@ -3,5 +3,5 @@
 
 namespace        = "ck"
 name             = "multi"
-environment      = "qaprim"
+environment      = "qapr"
 environment_name = "QA Primary"

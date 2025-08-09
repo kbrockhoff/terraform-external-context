@@ -4,8 +4,8 @@ module "primary_context" {
 
   namespace        = var.namespace
   name             = var.name
-  environment      = var.environment
-  environment_name = var.environment_name
+  environment      = "qapr"
+  environment_name = "QA Primary"
 
   # Set some additional context values to demonstrate inheritance
   cloud_provider   = "aws"

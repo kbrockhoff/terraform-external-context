@@ -44,7 +44,7 @@ func TestTerraformSubcontextExample(t *testing.T) {
 
 	// Verify that the plan shows the expected environment configurations
 	// The plan output should contain the different environment values
-	assert.Contains(t, planOutput, "qaprim")
+	assert.Contains(t, planOutput, "qapr")
 	assert.Contains(t, planOutput, "qafo")
 	assert.Contains(t, planOutput, "QA Primary")
 	assert.Contains(t, planOutput, "QA Failover")

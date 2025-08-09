@@ -1,7 +1,5 @@
 locals {
   default_constraints = {
-    id_replace_chars  = "/[^a-z0-9_-]/"
-    id_delimiter      = "-"
     tag_lowercase     = false
     tag_replace_chars = "/[<>%&\\?]/"
     tag_replacement   = "_"
@@ -93,18 +91,41 @@ locals {
   ) : ""
 
   # Name prefix generation logic following Brockhoff standards
-  # Rule 1: If namespace, environment, and name are provided, join with hyphens
+  # Rule 1: If namespace, name, and environment are provided, join with hyphens in order: namespace-name-environment
   # Rule 2: If only name is provided (namespace and environment are null/empty), use name only
+  # Rule 3: If the combined prefix exceeds 16 characters, truncate the name component to fit
 
-  generated_name_prefix = local.input.namespace == null || local.input.environment == null ? (
+  # Calculate raw name prefix first
+  raw_name_prefix = local.input.namespace == null || local.input.environment == null ? (
     local.input.name
     ) : (
-    lower(join("-", [local.input.namespace, local.input.environment, local.input.name]))
+    lower(join("-", [local.input.namespace, local.input.name, local.input.environment]))
   )
 
-  # Ensure compliance with /^[a-z][a-z0-9-]{1,15}$/ by truncating if necessary
-  # The name_prefix should be 2-16 characters total
-  name_prefix = length(local.generated_name_prefix) > 16 ? substr(local.generated_name_prefix, 0, 16) : local.generated_name_prefix
+  # Helper calculations for name truncation
+  namespace_len      = local.input.namespace != null ? length(local.input.namespace) : 0
+  environment_len    = local.input.environment != null ? length(local.input.environment) : 0
+  available_name_len = 16 - local.namespace_len - local.environment_len - 2
+  truncated_name_len = max(1, local.available_name_len)
+  truncated_name     = substr(local.input.name, 0, local.truncated_name_len)
+
+  # Truncate if necessary to fit within 16 character limit
+  name_prefix = length(local.raw_name_prefix) <= 16 ? local.raw_name_prefix : (
+    local.input.namespace == null || local.input.environment == null ? (
+      # If no namespace/environment, truncate name to 16 chars
+      substr(local.input.name, 0, 16)
+      ) : (
+      # Use calculated values to create truncated prefix
+      lower(join("-", [local.input.namespace, local.truncated_name, local.input.environment]))
+    )
+  )
+
+  # Validation: name_prefix must match /^[a-z][a-z0-9-]{0,14}[a-z0-9]$/
+  name_prefix_validation = (
+    can(regex("^[a-z][a-z0-9-]{0,14}[a-z0-9]$", local.name_prefix)) ?
+    null :
+    tobool("ERROR: name_prefix '${local.name_prefix}' does not match required pattern /^[a-z][a-z0-9-]{0,14}[a-z0-9]$/. Must be 2-16 characters, start with lowercase letter, contain only lowercase letters, numbers, and hyphens, and end with alphanumeric character.")
+  )
 
   sandbox_dt = local.input.environment_type == "Ephemeral" ? formatdate("YYYY-MM-DD", timeadd(timestamp(), "2160h")) : "never"
   delete_dt  = local.input.deletion_date == null ? local.sandbox_dt : local.input.deletion_date

@@ -12,13 +12,13 @@ This example creates two contexts:
 ## Architecture
 
 ```
-Primary Context (ck-qaprim-multi)
+Primary Context (ck-multi-qapr)
 ├── namespace: "ck"
-├── environment: "qaprim" 
-├── environment_name: "QA Primary"
-└── name: "multi"
+├── name: "multi"
+├── environment: "qapr" 
+└── environment_name: "QA Primary"
 
-Failover Context (ck-qafo-multi) 
+Failover Context (ck-multi-qafo) 
 ├── inherits all settings from Primary Context
 ├── environment: "qafo" (overridden)
 └── environment_name: "QA Failover" (overridden)
@@ -49,8 +49,8 @@ terraform output
 
 The example will show:
 
-- **Primary name prefix**: `ck-qaprim-multi`
-- **Failover name prefix**: `ck-qafo-multi`
+- **Primary name prefix**: `ck-multi-qapr`
+- **Failover name prefix**: `ck-multi-qafo`
 - **Inherited tags**: Both contexts will have the same base tags
 - **Environment-specific differences**: Only the environment-related values will differ
 
@@ -65,7 +65,7 @@ module "primary_context" {
   
   namespace        = "ck"
   name             = "multi"
-  environment      = "qaprim"
+  environment      = "qapr"
   environment_name = "QA Primary"
   
   # ... all other configuration
@@ -86,8 +86,8 @@ module "failover_context" {
 ### Name Prefix Behavior
 
 With the same namespace and name, but different environments:
-- Primary: `ck-qaprim-multi`
-- Failover: `ck-qafo-multi`
+- Primary: `ck-multi-qapr`
+- Failover: `ck-multi-qafo`
 
 This allows resources in both environments to follow the same naming pattern while remaining distinct.
 

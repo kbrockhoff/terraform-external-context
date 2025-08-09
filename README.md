@@ -130,7 +130,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_additional_data_tags"></a> [additional\_data\_tags](#input\_additional\_data\_tags) | Additional data tags for resources with data at rest (e.g. `map('DataClassification','Confidential')` | `map(string)` | `{}` | no |
+| <a name="input_additional_data_tags"></a> [additional\_data\_tags](#input\_additional\_data\_tags) | Additional data tags for resources with data at rest (e.g. `map('DataClassification','Confidential')`) | `map(string)` | `{}` | no |
 | <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags (e.g. `map('BusinessUnit','XYZ')` | `map(string)` | `{}` | no |
 | <a name="input_availability"></a> [availability](#input\_availability) | Standard name from enumerated list of availability requirements. (always\_on, business\_hours, preemptable) | `string` | `null` | no |
 | <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Public/private cloud provider [dc, aws, az, gcp, oci, ibm, do, vul, ali, cv]. | `string` | `null` | no |
