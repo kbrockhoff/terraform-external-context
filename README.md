@@ -6,31 +6,128 @@ names.
 
 ## Features
 
-- Feature 1
-- Feature 2
-- Feature 3
-- Monthly cost estimate submodule
-- Deployment pipeline least privilege IAM role submodule
+- Standardized resource name prefix generation following Brockhoff conventions (24-char limit with smart truncation)
+- Multi-cloud provider tag/label formatting for AWS, Azure, and GCP
+- Environment type-based configuration with predefined defaults for different deployment stages
+- Comprehensive tag normalization with character replacement and length limiting
+- Multiple output formats for tags (maps, lists, comma-separated strings, key=value pairs)
+- Automatic git repository URL detection and tagging
+- Context inheritance for modular Terraform composition
+- Data-specific tagging for resources handling sensitive information
 
 ## Usage
 
 ### Basic Example
 
 ```hcl
-module "example" {
-  source = "path/to/terraform-module"
+module "context" {
+  source = "github.com/kbrockhoff/terraform-external-context"
 
-  # ... other required arguments ...
+  # Simple name-only approach
+  name = "my-app"
+}
+
+# Use the context outputs in other resources
+resource "aws_s3_bucket" "example" {
+  bucket = "${module.context.name_prefix}-data"
+  
+  tags = module.context.tags
 }
 ```
 
 ### Complete Example
 
 ```hcl
-module "example" {
-  source = "path/to/terraform-module"
+module "context" {
+  source = "github.com/kbrockhoff/terraform-external-context"
 
-  # ... all available arguments ...
+  # Core identification
+  cloud_provider    = "aws"
+  namespace         = "myorg"
+  name              = "webapp"
+  environment       = "prod"
+  environment_name  = "Production"
+  environment_type  = "Production"
+
+  # Governance and compliance
+  cost_center       = "engineering"
+  product           = "customer-portal"
+  product_owners    = ["product@example.com"]
+  code_owners       = ["platform@example.com", "webapp-team@example.com"]
+  data_owners       = ["data-governance@example.com"]
+  
+  # Operational settings
+  availability      = "always_on"
+  sensitivity       = "confidential"
+  data_regs         = ["GDPR", "SOX"]
+  security_review   = "2024-01-15"
+  privacy_review    = "2024-01-15"
+  
+  # ITSM integration
+  itsm_platform     = "JIRA"
+  itsm_project_code = "WEB"
+
+  # Additional custom tags
+  additional_tags = {
+    Team        = "Platform Engineering"
+    CostOptimized = "true"
+  }
+  
+  additional_data_tags = {
+    DataClassification = "Confidential"
+    RetentionPeriod    = "7years"
+  }
+}
+
+# Example usage with multiple resource types
+resource "aws_s3_bucket" "data" {
+  bucket = "${module.context.name_prefix}-data"
+  tags   = module.context.data_tags  # Use data_tags for data storage
+}
+
+resource "aws_lambda_function" "processor" {
+  function_name = "${module.context.name_prefix}-processor"
+  
+  tags = module.context.tags  # Use regular tags for compute resources
+}
+```
+
+### Context Inheritance Example
+
+```hcl
+# Primary environment context
+module "primary_context" {
+  source = "github.com/kbrockhoff/terraform-external-context"
+
+  namespace        = "myorg"
+  name             = "api"
+  environment      = "prod-east"
+  environment_name = "Production East"
+  environment_type = "Production"
+  
+  cloud_provider   = "aws"
+  product          = "customer-api"
+  cost_center      = "engineering"
+  availability     = "always_on"
+  sensitivity      = "confidential"
+}
+
+# Disaster recovery context - inherits most settings
+module "dr_context" {
+  source = "github.com/kbrockhoff/terraform-external-context"
+
+  # Inherit all context from primary
+  context = module.primary_context.context
+  
+  # Override only environment-specific values
+  environment      = "prod-west"
+  environment_name = "Production West (DR)"
+  
+  # Add DR-specific tags
+  additional_tags = {
+    Purpose = "disaster-recovery"
+    Primary = module.primary_context.name_prefix
+  }
 }
 ```
 
@@ -53,55 +150,6 @@ the table below. Cost optimization settings focus on shutting down resources dur
 | `Production` | Live systems | High availability, durability, and performance | 1h  | 4h  |
 | `MissionCritical` | Critical production | Maximum reliability, redundancy, and monitoring | 5m  | 1h  |
 
-### Usage Examples
-
-#### Development Environment
-```hcl
-module "dev_resources" {
-  source = "path/to/terraform-module"
-  
-  name_prefix      = "dev-usw2"
-  environment_type = "Development"
-  
-  tags = {
-    Environment = "development"
-    Team        = "platform"
-  }
-}
-```
-
-#### Production Environment
-```hcl
-module "prod_resources" {
-  source = "path/to/terraform-module"
-  
-  name_prefix      = "prod-usw2"
-  environment_type = "Production"
-  
-  tags = {
-    Environment = "production"
-    Team        = "platform"
-    Backup      = "required"
-  }
-}
-```
-
-#### Custom Configuration (None)
-```hcl
-module "custom_resources" {
-  source = "path/to/terraform-module"
-  
-  name_prefix      = "custom-usw2"
-  environment_type = "None"
-  
-  # Specify all individual configuration values
-  # when environment_type is "None"
-}
-```
-## Network Tags Configuration
-
-Resources deployed to subnets use lookup by `NetworkTags` values to determine which subnets to deploy to. 
-This eliminates the need to manage different subnet IDs variable values for each environment.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -131,7 +179,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_additional_data_tags"></a> [additional\_data\_tags](#input\_additional\_data\_tags) | Additional data tags for resources with data at rest (e.g. `map('DataClassification','Confidential')`) | `map(string)` | `{}` | no |
-| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags (e.g. `map('BusinessUnit','XYZ')` | `map(string)` | `{}` | no |
+| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | `map(string)` | `{}` | no |
 | <a name="input_availability"></a> [availability](#input\_availability) | Standard name from enumerated list of availability requirements. (always\_on, business\_hours, preemptable) | `string` | `null` | no |
 | <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Public/private cloud provider [dc, aws, az, gcp, oci, ibm, do, vul, ali, cv]. | `string` | `null` | no |
 | <a name="input_code_owners"></a> [code\_owners](#input\_code\_owners) | List of email addresses to contact for application issue resolution. | `list(string)` | `null` | no |
