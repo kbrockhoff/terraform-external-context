@@ -276,7 +276,7 @@ variable "privacy_review" {
 }
 
 variable "additional_tags" {
-  description = "Additional tags (e.g. `map('BusinessUnit','XYZ')`"
+  description = "Additional tags (e.g. `map('BusinessUnit','XYZ')`)"
   type        = map(string)
   default     = {}
 }
