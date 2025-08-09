@@ -21,7 +21,7 @@ names.
 
 ```hcl
 module "context" {
-  source = "github.com/kbrockhoff/terraform-external-context"
+  source = "kbrockhoff/context/external"
 
   # Simple name-only approach
   name = "my-app"
@@ -39,7 +39,7 @@ resource "aws_s3_bucket" "example" {
 
 ```hcl
 module "context" {
-  source = "github.com/kbrockhoff/terraform-external-context"
+  source = "kbrockhoff/context/external"
 
   # Core identification
   cloud_provider    = "aws"
@@ -97,7 +97,7 @@ resource "aws_lambda_function" "processor" {
 ```hcl
 # Primary environment context
 module "primary_context" {
-  source = "github.com/kbrockhoff/terraform-external-context"
+  source = "kbrockhoff/context/external"
 
   namespace        = "myorg"
   name             = "api"
@@ -114,7 +114,7 @@ module "primary_context" {
 
 # Disaster recovery context - inherits most settings
 module "dr_context" {
-  source = "github.com/kbrockhoff/terraform-external-context"
+  source = "kbrockhoff/context/external"
 
   # Inherit all context from primary
   context = module.primary_context.context
