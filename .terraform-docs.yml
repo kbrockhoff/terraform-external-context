@@ -10,7 +10,7 @@ sections:
     - resources
 
 recursive:
-  enabled: true
+  enabled: false
   path: modules
   include-main: true
 

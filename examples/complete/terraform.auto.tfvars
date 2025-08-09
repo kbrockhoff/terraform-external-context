@@ -1,12 +1,42 @@
-enabled     = true
-name_prefix = "complete-ex"
-tags = {
-  "Environment" = "Production"
+enabled          = true
+environment_type = "None"
+
+# Core identification
+cloud_provider    = "aws"
+namespace         = "ck"
+name              = "complete"
+environment       = "dev"
+environment_name  = "Development"
+tag_prefix        = "ck-"
+itsm_platform     = "JIRA"
+itsm_project_code = "TF"
+
+# Ownership and governance
+cost_center    = "12345"
+product        = "terraform-context"
+product_owners = ["finance@example.com"]
+code_owners    = ["devops@example.com", "platform@example.com"]
+data_owners    = ["data-governance@example.com"]
+
+# Operational settings
+availability    = "business_hours"
+deployer        = "terraform-complete-example"
+deletion_date   = null
+sensitivity     = "confidential"
+data_regs       = ["GDPR", "SOX"]
+security_review = "2024-01-15"
+privacy_review  = "2024-01-15"
+
+# Additional tags
+additional_tags = {
+  "Environment" = "Development"
   "Example"     = "complete"
+  "Team"        = "Platform"
 }
-data_tags = {
+
+additional_data_tags = {
   "DataClassification" = "Confidential"
+  "RetentionPeriod"    = "7years"
 }
-environment_type        = "None"
-cost_estimation_enabled = true
-networktags_name        = "NetworkTags"
+
+source_repo_tags_enabled = true

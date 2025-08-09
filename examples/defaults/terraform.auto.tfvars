@@ -1,1 +1,1 @@
-name_prefix = "defaults"
+name = "defaults"

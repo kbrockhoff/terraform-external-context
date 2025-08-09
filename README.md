@@ -1,42 +1,8 @@
-# Brockhoff Cloud Terraform Module
+# Brockhoff Cloud Context Terraform Module
 
-> **📋 Template Setup Instructions**
->
-> After cloning this template repository, complete these setup steps:
->
-> 1. **Configure GitHub repository settings:**
->    - Under **Settings → Actions → General**
->      - Enable **Allow all actions and reusable workflows**
->      - Set **Workflow permissions** to "Read and write permissions"
->      - Enable **Workflow permissions** "Allow GitHub Actions to create and approve pull requests"
->
-> 2. **Configure repository secrets:**
->    - Under **Settings → Environments**
->      - Create `development` environment
->      - Add `AWS_ROLE_ARN` secret for GitHub Actions AWS access to your AWS development account
->    - Under **Settings → Secrets and variables → Actions → Repository secrets**
->      - Add `RELEASE_PLEASE_TOKEN` secret (Personal Access Token with repo permissions)
->    - For AWS authentication, ensure your IAM role has cross-account trust with GitHub OIDC
->
-> 3. **Configure main branch protection:**
->    - Under **Settings → Rules → Rulesets**
->      - Create new ruleset which applies to default branch and is set to Active
->      - Enable **Require a pull request before merging**
->      - Enable other rules as needed for your workflow
->
-> 4. **Replace placeholder text:**
->    - Find and replace all instances of `replace-me` with your actual module name
->    - Find and replace all instances of `replace` with appropriate values
->    - Update `CLOUD` and `XXX` placeholders with your target cloud provider and resources
->
-> 5. **Update module metadata:**
->    - Modify `locals.tf` → `ModuleName` to match your module using Terraform registry naming conventions
->    - Update repository URLs and documentation
->    - Customize examples and tests for your specific resources
-
-Terraform module which creates XXX resources on CLOUD. It takes an opinionated 
-approach to resource placement, naming, tagging, and well-architected best 
-practices.
+Terraform module which creates standardized resource name prefixes and tags/labels which conform with
+values expected by Brockhoff Terraform modules. It provides limited flexibility in adjusting tag/label
+names.
 
 ## Features
 
@@ -143,58 +109,70 @@ This eliminates the need to manage different subnet IDs variable values for each
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
+| <a name="requirement_external"></a> [external](#requirement\_external) | >= 2.3 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.6.0 |
+| <a name="provider_external"></a> [external](#provider\_external) | 2.3.5 |
 
 ## Modules
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_pricing"></a> [pricing](#module\_pricing) | ./modules/pricing | n/a |
+No modules.
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [aws_kms_alias.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
-| [aws_kms_key.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
-| [aws_sns_topic.alarms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Organization unique prefix to use for resource names. Recommend including environment and region. e.g. 'prod-usw2' | `string` | n/a | yes |
-| <a name="input_alarm_sns_topic_arn"></a> [alarm\_sns\_topic\_arn](#input\_alarm\_sns\_topic\_arn) | ARN of existing SNS topic to use for alarm notifications. Only used when create\_alarm\_sns\_topic is false. | `string` | `""` | no |
-| <a name="input_alarms_enabled"></a> [alarms\_enabled](#input\_alarms\_enabled) | Enable CloudWatch alarms for monitoring autoscaling group health | `bool` | `false` | no |
-| <a name="input_cost_estimation_enabled"></a> [cost\_estimation\_enabled](#input\_cost\_estimation\_enabled) | Set to false to disable estimation of monthly costs for provisioned resources | `bool` | `true` | no |
-| <a name="input_create_alarm_sns_topic"></a> [create\_alarm\_sns\_topic](#input\_create\_alarm\_sns\_topic) | Set to true to create an SNS topic for alarm notifications. Set to false to use an existing topic specified in alarm\_sns\_topic\_arn. | `bool` | `true` | no |
-| <a name="input_create_kms_key"></a> [create\_kms\_key](#input\_create\_kms\_key) | Set to true to create a customer-managed KMS key for encryption. Set to false to use an existing key specified in kms\_key\_id. | `bool` | `true` | no |
-| <a name="input_data_tags"></a> [data\_tags](#input\_data\_tags) | Tags/labels to apply to all resources with data-at-rest | `map(string)` | `{}` | no |
-| <a name="input_enabled"></a> [enabled](#input\_enabled) | Set to false to prevent the module from creating any resources | `bool` | `true` | no |
+| <a name="input_additional_data_tags"></a> [additional\_data\_tags](#input\_additional\_data\_tags) | Additional data tags for resources with data at rest (e.g. `map('DataClassification','Confidential')`) | `map(string)` | `{}` | no |
+| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags (e.g. `map('BusinessUnit','XYZ')` | `map(string)` | `{}` | no |
+| <a name="input_availability"></a> [availability](#input\_availability) | Standard name from enumerated list of availability requirements. (always\_on, business\_hours, preemptable) | `string` | `null` | no |
+| <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Public/private cloud provider [dc, aws, az, gcp, oci, ibm, do, vul, ali, cv]. | `string` | `null` | no |
+| <a name="input_code_owners"></a> [code\_owners](#input\_code\_owners) | List of email addresses to contact for application issue resolution. | `list(string)` | `null` | no |
+| <a name="input_context"></a> [context](#input\_context) | Single object for setting entire context at once.<br/>See description of individual variables for details.<br/>Leave string and numeric variables as `null` to use default value.<br/>Individual variable settings (non-null) override settings in context object,<br/>except for additional\_tags and additional\_data\_tags which are merged. | `any` | <pre>{<br/>  "additional_data_tags": {},<br/>  "additional_tags": {},<br/>  "availability": "preemptable",<br/>  "cloud_provider": "dc",<br/>  "code_owners": [],<br/>  "cost_center": null,<br/>  "data_owners": [],<br/>  "data_regs": [],<br/>  "deletion_date": null,<br/>  "deployer": "Terraform",<br/>  "enabled": true,<br/>  "environment": null,<br/>  "environment_name": null,<br/>  "environment_type": "Development",<br/>  "itsm_platform": null,<br/>  "itsm_project_code": null,<br/>  "name": null,<br/>  "namespace": null,<br/>  "privacy_review": null,<br/>  "product": null,<br/>  "product_owners": [],<br/>  "security_review": null,<br/>  "sensitivity": "confidential",<br/>  "source_repo_tags_enabled": true,<br/>  "tag_prefix": "ck-"<br/>}</pre> | no |
+| <a name="input_cost_center"></a> [cost\_center](#input\_cost\_center) | Cost center this resource should be billed to. | `string` | `null` | no |
+| <a name="input_data_owners"></a> [data\_owners](#input\_data\_owners) | List of email addresses to contact for data governance issues. | `list(string)` | `null` | no |
+| <a name="input_data_regs"></a> [data\_regs](#input\_data\_regs) | List of regulations which resource data must comply with. | `list(string)` | `null` | no |
+| <a name="input_deletion_date"></a> [deletion\_date](#input\_deletion\_date) | Date resource should be deleted if still running. | `string` | `null` | no |
+| <a name="input_deployer"></a> [deployer](#input\_deployer) | ID of the CI/CD platform or person who last updated the resource. | `string` | `null` | no |
+| <a name="input_enabled"></a> [enabled](#input\_enabled) | Set to false to prevent the module from creating any resources. | `bool` | `null` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | Abbreviation for the deployment environment. i.e. [sbox, dev, test, qa, uat, prod, prd-use1, prd-usw2, dr] | `string` | `null` | no |
+| <a name="input_environment_name"></a> [environment\_name](#input\_environment\_name) | Full name for the deployment environment (can be more descriptive than the standard environment). | `string` | `null` | no |
 | <a name="input_environment_type"></a> [environment\_type](#input\_environment\_type) | Environment type for resource configuration defaults. Select 'None' to use individual config values. | `string` | `"Development"` | no |
-| <a name="input_kms_key_deletion_window_days"></a> [kms\_key\_deletion\_window\_days](#input\_kms\_key\_deletion\_window\_days) | Number of days to wait before deleting KMS key when destroyed. Only used when create\_kms\_key is true. | `number` | `14` | no |
-| <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | ARN or ID of existing KMS key to use for encryption. Only used when create\_kms\_key is false. | `string` | `""` | no |
-| <a name="input_monitoring_enabled"></a> [monitoring\_enabled](#input\_monitoring\_enabled) | Launched EC2 instance will have detailed monitoring enabled. | `bool` | `false` | no |
-| <a name="input_networktags_name"></a> [networktags\_name](#input\_networktags\_name) | Name of the network tags key used for subnet classification | `string` | `"NetworkTags"` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags/labels to apply to all resources | `map(string)` | `{}` | no |
+| <a name="input_itsm_platform"></a> [itsm\_platform](#input\_itsm\_platform) | System for ticketing (i.e. JIRA, SNOW). | `string` | `null` | no |
+| <a name="input_itsm_project_code"></a> [itsm\_project\_code](#input\_itsm\_project\_code) | The prefix used on your ITSM Platform tickets. | `string` | `null` | no |
+| <a name="input_name"></a> [name](#input\_name) | Unique name within that particular hierarchy level and resource type. | `string` | `null` | no |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace which could be an organization, business unit, or other grouping. | `string` | `null` | no |
+| <a name="input_privacy_review"></a> [privacy\_review](#input\_privacy\_review) | ID or date of last data privacy review or audit. | `string` | `null` | no |
+| <a name="input_product"></a> [product](#input\_product) | Identifier for the product or project which created or owns this resource. | `string` | `null` | no |
+| <a name="input_product_owners"></a> [product\_owners](#input\_product\_owners) | List of email addresses to contact with billing questions. | `list(string)` | `null` | no |
+| <a name="input_security_review"></a> [security\_review](#input\_security\_review) | ID or date of last security review or audit | `string` | `null` | no |
+| <a name="input_sensitivity"></a> [sensitivity](#input\_sensitivity) | Standard name from enumerated list for data sensitivity. (public, internal, trusted-3rd-party, confidential, highly-confidential, client-classified) | `string` | `null` | no |
+| <a name="input_source_repo_tags_enabled"></a> [source\_repo\_tags\_enabled](#input\_source\_repo\_tags\_enabled) | Enable source repository tags | `bool` | `true` | no |
+| <a name="input_tag_prefix"></a> [tag\_prefix](#input\_tag\_prefix) | Prefix for standardized tags | `string` | `"ck-"` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_alarm_sns_topic_arn"></a> [alarm\_sns\_topic\_arn](#output\_alarm\_sns\_topic\_arn) | ARN of the SNS topic used for alarm notifications |
-| <a name="output_alarm_sns_topic_name"></a> [alarm\_sns\_topic\_name](#output\_alarm\_sns\_topic\_name) | Name of the SNS topic used for alarm notifications |
-| <a name="output_cost_breakdown"></a> [cost\_breakdown](#output\_cost\_breakdown) | Detailed breakdown of monthly costs by service |
-| <a name="output_kms_alias_name"></a> [kms\_alias\_name](#output\_kms\_alias\_name) | Name of the KMS key alias |
-| <a name="output_kms_key_arn"></a> [kms\_key\_arn](#output\_kms\_key\_arn) | ARN of the KMS key used for encryption |
-| <a name="output_kms_key_id"></a> [kms\_key\_id](#output\_kms\_key\_id) | ID of the KMS key used for encryption |
-| <a name="output_monthly_cost_estimate"></a> [monthly\_cost\_estimate](#output\_monthly\_cost\_estimate) | Estimated monthly cost in USD for module resources |
+| <a name="output_context"></a> [context](#output\_context) | Merged but otherwise unmodified input to this module, to be used as context input to other modules. |
+| <a name="output_data_tags"></a> [data\_tags](#output\_data\_tags) | Normalized data tags map. |
+| <a name="output_data_tags_as_comma_separated_string"></a> [data\_tags\_as\_comma\_separated\_string](#output\_data\_tags\_as\_comma\_separated\_string) | Data tags as a comma-separated string, which can be used by command line tools. |
+| <a name="output_data_tags_as_kvp_list"></a> [data\_tags\_as\_kvp\_list](#output\_data\_tags\_as\_kvp\_list) | Data tags as a list of key=value pairs. |
+| <a name="output_data_tags_as_list_of_maps"></a> [data\_tags\_as\_list\_of\_maps](#output\_data\_tags\_as\_list\_of\_maps) | Additional data tags as a list of maps, which can be used in several AWS resources. |
+| <a name="output_environment_type"></a> [environment\_type](#output\_environment\_type) | Environment type for resource configuration defaults. |
+| <a name="output_name_prefix"></a> [name\_prefix](#output\_name\_prefix) | Disambiguated ID or name prefix for resources in the context. |
+| <a name="output_normalized_context"></a> [normalized\_context](#output\_normalized\_context) | Normalized context of this module. |
+| <a name="output_tags"></a> [tags](#output\_tags) | Normalized tags map. |
+| <a name="output_tags_as_comma_separated_string"></a> [tags\_as\_comma\_separated\_string](#output\_tags\_as\_comma\_separated\_string) | Tags as a comma-separated string, which can be used by command line tools. |
+| <a name="output_tags_as_kvp_list"></a> [tags\_as\_kvp\_list](#output\_tags\_as\_kvp\_list) | Tags as a list of key=value pairs. |
+| <a name="output_tags_as_list_of_maps"></a> [tags\_as\_list\_of\_maps](#output\_tags\_as\_list\_of\_maps) | Additional tags as a list of maps, which can be used in several AWS resources. |
 <!-- END_TF_DOCS -->    
 
 ## License

@@ -1,4 +1,4 @@
-# Terraform AWS S3 Backend Module Makefile
+# Terraform Brockhoff Module Makefile
 # Optimized for AI agents to reduce LLM calls and token usage
 
 .PHONY: help validate test clean format docs all status pre-commit lint check plan-examples destroy-examples
@@ -21,7 +21,15 @@ help: ## Display this help message
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make $(CYAN)<target>$(RESET)\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  $(CYAN)%-15s$(RESET) %s\n", $$1, $$2 } /^##@/ { printf "\n$(YELLOW)%s$(RESET)\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 ##@ Validation
-validate: ## Run complete validation pipeline (format, validate, lint, test, docs)
+pre-commit: ## Run lightweight validation before commit without push (format, validate, lint, docs)
+	@echo "$(CYAN)Running pre-commit checks...$(RESET)"
+	@$(MAKE) format
+	@$(MAKE) check
+	@$(MAKE) lint
+	@$(MAKE) docs
+	@echo "$(GREEN)✓ Pre-commit checks passed$(RESET)"
+
+validate: ## Run complete validation pipeline before commit with push (format, validate, lint, test, docs)
 	@echo "$(CYAN)Running complete validation pipeline...$(RESET)"
 	@$(MAKE) format
 	@$(MAKE) check
@@ -62,26 +70,31 @@ lint: ## Run TFLint on all Terraform files
 	fi
 
 ##@ Testing
-test: check-aws ## Run all tests
+test:  ## Run all tests
 	@echo "$(CYAN)Running tests...$(RESET)"
 	@cd test && go mod tidy
 	@cd test && go test -v -timeout 30m -parallel 4
 	@echo "$(GREEN)✓ All tests passed$(RESET)"
 
-test-defaults: check-aws ## Run only defaults example test
+test-defaults:  ## Run only defaults example test
 	@echo "$(CYAN)Running defaults test...$(RESET)"
 	@cd test && go test -v -timeout 15m -run TestTerraformDefaultsExample
 	@echo "$(GREEN)✓ Defaults test passed$(RESET)"
 
-test-complete: check-aws ## Run only complete example test
+test-complete:  ## Run only complete example test
 	@echo "$(CYAN)Running complete test...$(RESET)"
 	@cd test && go test -v -timeout 15m -run TestTerraformCompleteExample
 	@echo "$(GREEN)✓ Complete test passed$(RESET)"
 
-test-enabled-false: check-aws ## Run only enabled=false test
+test-enabled-false:  ## Run only enabled=false test
 	@echo "$(CYAN)Running enabled=false test...$(RESET)"
 	@cd test && go test -v -timeout 15m -run TestEnabledFalse
 	@echo "$(GREEN)✓ Enabled=false test passed$(RESET)"
+
+test-subcontext:  ## Run only subcontext example test
+	@echo "$(CYAN)Running subcontext test...$(RESET)"
+	@cd test && go test -v -timeout 15m -run TestTerraformSubcontextExample
+	@echo "$(GREEN)✓ Subcontext test passed$(RESET)"
 
 ##@ Documentation
 docs: ## Generate documentation
@@ -94,7 +107,7 @@ docs: ## Generate documentation
 	fi
 
 ##@ Examples
-plan-examples: check-aws ## Plan all examples (useful for verification)
+plan-examples:  ## Plan all examples (useful for verification)
 	@echo "$(CYAN)Planning all examples...$(RESET)"
 	@for dir in examples/*/; do \
 		echo "$(CYAN)Planning $$dir...$(RESET)"; \
@@ -106,7 +119,7 @@ plan-examples: check-aws ## Plan all examples (useful for verification)
 		echo "$(GREEN)✓ $$dir plan successful$(RESET)"; \
 	done
 
-apply-examples: check-aws ## Apply examples using existing plans (requires plan-examples first)
+apply-examples:  ## Apply examples using existing plans (requires plan-examples first)
 	@echo "$(CYAN)Applying all example plans...$(RESET)"
 	@echo "$(YELLOW)⚠ This will create real AWS resources and incur costs!$(RESET)"
 	@echo "$(YELLOW)Press Ctrl+C within 10 seconds to cancel...$(RESET)"
@@ -125,7 +138,7 @@ apply-examples: check-aws ## Apply examples using existing plans (requires plan-
 	@echo "$(GREEN)✓ All examples applied successfully$(RESET)"
 	@echo "$(YELLOW)⚠ Don't forget to run 'make destroy-examples' to cleanup resources$(RESET)"
 
-destroy-examples: check-aws ## Destroy any leftover example resources (cleanup)
+destroy-examples:  ## Destroy any leftover example resources (cleanup)
 	@echo "$(CYAN)Cleaning up example resources...$(RESET)"
 	@for dir in examples/*/; do \
 		echo "$(CYAN)Destroying $$dir...$(RESET)"; \
@@ -134,7 +147,7 @@ destroy-examples: check-aws ## Destroy any leftover example resources (cleanup)
 		echo "$(GREEN)✓ $$dir cleanup complete$(RESET)"; \
 	done
 
-test-examples-full: check-aws ## Full example workflow: plan -> apply -> destroy
+test-examples-full:  ## Full example workflow: plan -> apply -> destroy
 	@echo "$(CYAN)Running full example workflow...$(RESET)"
 	@echo "$(YELLOW)⚠ This will create and destroy real AWS resources!$(RESET)"
 	@$(MAKE) plan-examples
@@ -163,29 +176,6 @@ status: ## Show comprehensive module status
 	@echo "$(YELLOW)Examples:$(RESET)"
 	@find examples -name "main.tf" 2>/dev/null | wc -l | xargs echo "Example directories:" || echo "Example directories: 0"
 
-info: ## Show quick module information
-	@echo "$(CYAN)=== Quick Info ===$(RESET)"
-	@echo "$(YELLOW)Module:$(RESET) Terraform AWS S3 Backend"
-	@echo "$(YELLOW)Purpose:$(RESET) Provisions S3 backend resources for Terraform state"
-	@echo "$(YELLOW)Resources:$(RESET) S3 bucket, DynamoDB table, KMS key, CloudWatch alarms"
-	@echo "$(YELLOW)Examples:$(RESET) defaults (9 resources), complete (15 resources)"
-	@echo "$(YELLOW)Tests:$(RESET) $$(find test -name "*_test.go" 2>/dev/null | wc -l | tr -d ' ') test files"
-
-##@ Pre-commit and CI
-pre-commit: ## Run pre-commit validation (what CI runs)
-	@echo "$(CYAN)Running pre-commit checks...$(RESET)"
-	@$(MAKE) format
-	@$(MAKE) check
-	@$(MAKE) lint
-	@$(MAKE) docs
-	@echo "$(GREEN)✓ Pre-commit checks passed$(RESET)"
-
-ci: check-aws ## Run full CI pipeline locally
-	@echo "$(CYAN)Running full CI pipeline...$(RESET)"
-	@$(MAKE) pre-commit
-	@$(MAKE) test
-	@echo "$(GREEN)✓ CI pipeline completed successfully$(RESET)"
-
 ##@ Cleanup
 clean: ## Clean up temporary files and caches
 	@echo "$(CYAN)Cleaning up...$(RESET)"
@@ -195,39 +185,6 @@ clean: ## Clean up temporary files and caches
 	@find . -name "*.tfplan" -delete 2>/dev/null || true
 	@find . -name "*.log" -delete 2>/dev/null || true
 	@echo "$(GREEN)✓ Cleanup complete$(RESET)"
-
-##@ AWS and Prerequisites
-check-aws: ## Check for valid AWS session and credentials
-	@echo "$(CYAN)Checking AWS session...$(RESET)"
-	@if ! command -v aws >/dev/null 2>&1; then \
-		echo "$(RED)✗ AWS CLI not installed$(RESET)"; \
-		echo "$(YELLOW)Install with: brew install awscli (macOS) or apt-get install awscli (Ubuntu)$(RESET)"; \
-		exit 1; \
-	fi
-	@if ! aws sts get-caller-identity >/dev/null 2>&1; then \
-		echo "$(RED)✗ No valid AWS session found$(RESET)"; \
-		echo "$(YELLOW)Configure AWS credentials with:$(RESET)"; \
-		echo "  aws configure"; \
-		echo "  aws sso login"; \
-		echo "  export AWS_PROFILE=your-profile"; \
-		exit 1; \
-	fi
-	@echo "$(GREEN)✓ AWS session valid$(RESET)"
-	@echo "$(CYAN)AWS Identity:$(RESET)"
-	@aws sts get-caller-identity --output table 2>/dev/null || echo "Could not retrieve identity details"
-
-check-aws-quiet: ## Check AWS session without output (for internal use)
-	@command -v aws >/dev/null 2>&1 || exit 1
-	@aws sts get-caller-identity >/dev/null 2>&1 || exit 1
-
-aws-info: check-aws ## Show detailed AWS session information
-	@echo "$(CYAN)=== AWS Session Details ===$(RESET)"
-	@echo "$(YELLOW)Identity:$(RESET)"
-	@aws sts get-caller-identity --output table
-	@echo "$(YELLOW)Region:$(RESET)"
-	@aws configure get region 2>/dev/null || echo "Not configured (will use default)"
-	@echo "$(YELLOW)Profile:$(RESET)"
-	@echo "$${AWS_PROFILE:-default}"
 
 ##@ AI Agent Shortcuts
 resource-count: ## Show expected resource counts for verification
@@ -243,7 +200,22 @@ verify-tests: ## Verify test structure and names
 	@echo "  - TestTerraformDefaultsExample"
 	@echo "  - TestTerraformCompleteExample" 
 	@echo "  - TestEnabledFalse"
+	@echo "  - TestTerraformSubcontextExample"
 
 ##@ Development
+update-branch: ## Update current branch with latest main (merge if exists on origin, rebase if local only)
+	@echo "$(CYAN)Updating branch with latest main...$(RESET)"
+	@git fetch origin
+	@CURRENT_BRANCH=$$(git branch --show-current); \
+	if git show-ref --verify --quiet "refs/remotes/origin/$$CURRENT_BRANCH"; then \
+		echo "$(CYAN)Branch $$CURRENT_BRANCH exists on origin, merging main...$(RESET)"; \
+		git merge origin/main || (echo "$(RED)✗ Merge conflict detected. Please resolve manually.$(RESET)" && exit 1); \
+		echo "$(GREEN)✓ Merged main into $$CURRENT_BRANCH$(RESET)"; \
+	else \
+		echo "$(CYAN)Branch $$CURRENT_BRANCH is local only, rebasing on main...$(RESET)"; \
+		git rebase origin/main || (echo "$(RED)✗ Rebase conflict detected. Please resolve manually.$(RESET)" && exit 1); \
+		echo "$(GREEN)✓ Rebased $$CURRENT_BRANCH on main$(RESET)"; \
+	fi
+
 all: clean validate test docs ## Run complete development workflow
 	@echo "$(GREEN)✓ Complete workflow finished$(RESET)"

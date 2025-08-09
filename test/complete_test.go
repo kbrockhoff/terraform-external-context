@@ -17,7 +17,7 @@ func TestTerraformCompleteExample(t *testing.T) {
 
 		// Variables to pass to our Terraform code using -var options
 		Vars: map[string]interface{}{
-			"name_prefix":      expectedName,
+			"name":             expectedName,
 			"environment_type": "None",
 		},
 
@@ -32,19 +32,14 @@ func TestTerraformCompleteExample(t *testing.T) {
 	terraform.Init(t, terraformOptions)
 	planOutput := terraform.Plan(t, terraformOptions)
 
-	// Verify the plan completed without errors and shows expected resource creation
+	// Verify the plan completed without errors
 	assert.NotEmpty(t, planOutput)
 	
-	// Verify core KMS resources are planned for creation
-	assert.Contains(t, planOutput, "module.main.aws_kms_key.main[0]")
-	assert.Contains(t, planOutput, "module.main.aws_kms_alias.main[0]")
-	assert.Contains(t, planOutput, "will be created")
+	// Context module should not create any infrastructure resources, but may execute external data source
+	assert.Contains(t, planOutput, "data.external.git_repo[0]")
 	
-	// Verify SNS topic is NOT created when alarms_enabled=false (default)
-	assert.NotContains(t, planOutput, "module.main.aws_sns_topic.alarms")
-	
-	// Verify expected resource count (2 resources: KMS key + alias)
-	assert.Contains(t, planOutput, "2 to add, 0 to change, 0 to destroy")
+	// Plan should show no infrastructure changes
+	assert.Contains(t, planOutput, "No changes")
 
 }
 
@@ -59,7 +54,7 @@ func TestEnabledFalse(t *testing.T) {
 		// Variables to pass to our Terraform code using -var options
 		Vars: map[string]interface{}{
 			"enabled":          false,
-			"name_prefix":      expectedName,
+			"name":             expectedName,
 			"environment_type": "None",
 		},
 
@@ -70,12 +65,49 @@ func TestEnabledFalse(t *testing.T) {
 	// At the end of the test, run `terraform destroy` to clean up any resources that were created
 	defer terraform.Destroy(t, terraformOptions)
 
-	// This will run `terraform init` and `terraform plan` to validate configuration without creating resources
+	// This will run `terraform init` and `terraform plan` to validate disabled behavior
 	terraform.Init(t, terraformOptions)
 	planOutput := terraform.Plan(t, terraformOptions)
 
-	// Verify the plan completed without errors and shows expected output changes
+	// Verify plan shows no changes when module is disabled
 	assert.NotEmpty(t, planOutput)
-	assert.Contains(t, planOutput, "No changes.")
+	assert.Contains(t, planOutput, "No changes")
+
+}
+
+func TestSourceRepoTagsDisabled(t *testing.T) {
+	t.Parallel()
+	expectedName := generateTestNamePrefix("nosrc")
+
+	terraformOptions := &terraform.Options{
+		// The path to where our Terraform code is located
+		TerraformDir: "../examples/complete",
+
+		// Variables to pass to our Terraform code using -var options
+		Vars: map[string]interface{}{
+			"name":                     expectedName,
+			"environment_type":         "None", 
+			"source_repo_tags_enabled": false,
+		},
+
+		// Environment variables to set when running Terraform
+		EnvVars: map[string]string{},
+	}
+
+	// At the end of the test, run `terraform destroy` to clean up any resources that were created
+	defer terraform.Destroy(t, terraformOptions)
+
+	// This will run `terraform init` and `terraform plan` to validate no external data source
+	terraform.Init(t, terraformOptions)
+	planOutput := terraform.Plan(t, terraformOptions)
+
+	// Verify the plan completed without errors
+	assert.NotEmpty(t, planOutput)
+	
+	// Should not execute external data source when source repo tags disabled
+	assert.NotContains(t, planOutput, "data.external.git_repo[0]")
+	
+	// Plan should show no infrastructure changes
+	assert.Contains(t, planOutput, "No changes")
 
 }

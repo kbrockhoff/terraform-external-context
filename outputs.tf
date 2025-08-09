@@ -1,50 +1,61 @@
-# ----
-# Primary resources IDs and names
-# ----
-
-# ----
-# Encryption
-# ----
-
-output "kms_key_id" {
-  description = "ID of the KMS key used for encryption"
-  value       = var.enabled && var.create_kms_key ? aws_kms_key.main[0].key_id : ""
+output "name_prefix" {
+  description = "Disambiguated ID or name prefix for resources in the context."
+  value       = local.enabled ? local.name_prefix : ""
 }
 
-output "kms_key_arn" {
-  description = "ARN of the KMS key used for encryption"
-  value       = local.kms_key_id
+output "environment_type" {
+  description = "Environment type for resource configuration defaults."
+  value       = local.input.environment_type
 }
 
-output "kms_alias_name" {
-  description = "Name of the KMS key alias"
-  value       = var.enabled && var.create_kms_key ? aws_kms_alias.main[0].name : ""
+output "tags" {
+  description = "Normalized tags map."
+  value       = local.enabled ? local.tags : {}
 }
 
-# ----
-# Monitoring
-# ----
-
-output "alarm_sns_topic_arn" {
-  description = "ARN of the SNS topic used for alarm notifications"
-  value       = local.alarm_sns_topic_arn
+output "data_tags" {
+  description = "Normalized data tags map."
+  value       = local.enabled ? local.data_tags : {}
 }
 
-output "alarm_sns_topic_name" {
-  description = "Name of the SNS topic used for alarm notifications"
-  value       = var.enabled && local.effective_config.alarms_enabled && var.create_alarm_sns_topic ? aws_sns_topic.alarms[0].name : ""
+
+output "tags_as_list_of_maps" {
+  description = "Additional tags as a list of maps, which can be used in several AWS resources."
+  value       = local.tags_as_list_of_maps
 }
 
-# ----
-# Pricing
-# ----
-
-output "monthly_cost_estimate" {
-  description = "Estimated monthly cost in USD for module resources"
-  value       = module.pricing.monthly_cost_estimate
+output "tags_as_kvp_list" {
+  description = "Tags as a list of key=value pairs."
+  value       = local.tags_as_kvp_list
 }
 
-output "cost_breakdown" {
-  description = "Detailed breakdown of monthly costs by service"
-  value       = module.pricing.cost_breakdown
+output "tags_as_comma_separated_string" {
+  description = "Tags as a comma-separated string, which can be used by command line tools."
+  value       = local.tags_as_comma_separated_string
+}
+
+output "data_tags_as_list_of_maps" {
+  description = "Additional data tags as a list of maps, which can be used in several AWS resources."
+  value       = local.data_tags_as_list_of_maps
+}
+
+output "data_tags_as_kvp_list" {
+  description = "Data tags as a list of key=value pairs."
+  value       = local.data_tags_as_kvp_list
+}
+
+output "data_tags_as_comma_separated_string" {
+  description = "Data tags as a comma-separated string, which can be used by command line tools."
+  value       = local.data_tags_as_comma_separated_string
+}
+
+
+output "normalized_context" {
+  description = "Normalized context of this module."
+  value       = local.output_context
+}
+
+output "context" {
+  description = "Merged but otherwise unmodified input to this module, to be used as context input to other modules."
+  value       = local.input
 }
