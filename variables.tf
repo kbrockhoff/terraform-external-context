@@ -1,3 +1,15 @@
+variable "availability_values" {
+  description = "List of allowed availability values"
+  type        = list(string)
+  default     = ["always_on", "business_hours", "preemptable"]
+}
+
+variable "sensitivity_values" {
+  description = "List of allowed sensitivity values for data classification"
+  type        = list(string)
+  default     = ["public", "internal", "trusted-3rd-party", "confidential", "highly-confidential", "client-classified"]
+}
+
 variable "context" {
   description = <<-EOT
     Single object for setting entire context at once.
@@ -15,24 +27,31 @@ variable "context" {
     name                     = null
     environment              = null
     environment_name         = null
-    tag_prefix               = "ck-"
+    tag_prefix               = "bc-"
+    pm_platform              = null
+    pm_project_code          = null
     itsm_platform            = null
-    itsm_project_code        = null
+    itsm_system_id           = null
+    itsm_component_id        = null
+    itsm_instance_id         = null
     cost_center              = null
-    product                  = null
     product_owners           = []
     code_owners              = []
     data_owners              = []
     availability             = "preemptable"
-    deployer                 = "Terraform"
+    availability_values      = ["always_on", "business_hours", "preemptable"]
+    managedby                = "Terraform"
     deletion_date            = null
     sensitivity              = "confidential"
+    sensitivity_values       = ["public", "internal", "trusted-3rd-party", "confidential", "highly-confidential", "client-classified"]
     data_regs                = []
     security_review          = null
     privacy_review           = null
     additional_tags          = {}
     additional_data_tags     = {}
     source_repo_tags_enabled = true
+    system_prefixes_enabled  = true
+    owner_tags_enabled       = true
   }
 
   validation {
@@ -72,18 +91,18 @@ variable "context" {
     condition = var.context.availability == null ? (
       true
       ) : (
-      contains(["always_on", "business_hours", "preemptable"], var.context.availability)
+      contains(var.availability_values, var.context.availability)
     )
-    error_message = "Allowed values: `always_on`, `business_hours`, `preemptable`."
+    error_message = "Allowed values: ${join(", ", [for v in var.availability_values : "`${v}`"])}."
   }
 
   validation {
     condition = var.context.sensitivity == null ? (
       true
       ) : (
-      contains(["public", "internal", "trusted-3rd-party", "confidential", "highly-confidential", "client-classified"], var.context.sensitivity)
+      contains(var.sensitivity_values, var.context.sensitivity)
     )
-    error_message = "Allowed values: `public`, `internal`, `trusted-3rd-party`, `confidential`, `highly-confidential`, `client-classified`."
+    error_message = "Allowed values: ${join(", ", [for v in var.sensitivity_values : "`${v}`"])}."
   }
 }
 
@@ -170,17 +189,17 @@ variable "environment_name" {
 variable "tag_prefix" {
   description = "Prefix for standardized tags"
   type        = string
-  default     = "ck-"
+  default     = "bc-"
 }
 
-variable "itsm_platform" {
-  description = "System for ticketing (i.e. JIRA, SNOW)."
+variable "pm_platform" {
+  description = "System for project management ticketing (i.e. JIRA, SNOW)."
   type        = string
   default     = null
 }
 
-variable "itsm_project_code" {
-  description = "The prefix used on your ITSM Platform tickets."
+variable "pm_project_code" {
+  description = "The prefix used on your project management platform tickets."
   type        = string
   default     = null
 }
@@ -191,11 +210,6 @@ variable "cost_center" {
   default     = null
 }
 
-variable "product" {
-  description = "Identifier for the product or project which created or owns this resource."
-  type        = string
-  default     = null
-}
 
 variable "product_owners" {
   description = "List of email addresses to contact with billing questions."
@@ -224,13 +238,13 @@ variable "availability" {
     condition = var.availability == null ? (
       true
       ) : (
-      contains(["always_on", "business_hours", "preemptable"], var.availability)
+      contains(var.availability_values, var.availability)
     )
-    error_message = "Allowed values: `always_on`, `business_hours`, `preemptable`."
+    error_message = "Allowed values: ${join(", ", [for v in var.availability_values : "`${v}`"])}."
   }
 }
 
-variable "deployer" {
+variable "managedby" {
   description = "ID of the CI/CD platform or person who last updated the resource."
   type        = string
   default     = null
@@ -251,9 +265,9 @@ variable "sensitivity" {
     condition = var.sensitivity == null ? (
       true
       ) : (
-      contains(["public", "internal", "trusted-3rd-party", "confidential", "highly-confidential", "client-classified"], var.sensitivity)
+      contains(var.sensitivity_values, var.sensitivity)
     )
-    error_message = "Allowed values: `public`, `internal`, `trusted-3rd-party`, `confidential`, `highly-confidential`, `client-classified`."
+    error_message = "Allowed values: ${join(", ", [for v in var.sensitivity_values : "`${v}`"])}."
   }
 }
 
@@ -291,4 +305,40 @@ variable "source_repo_tags_enabled" {
   description = "Enable source repository tags"
   type        = bool
   default     = true
+}
+
+variable "system_prefixes_enabled" {
+  description = "Enable system prefixes in project management and ITSM tags"
+  type        = bool
+  default     = true
+}
+
+variable "owner_tags_enabled" {
+  description = "Enable owner tags (productowners, codeowners, dataowners)"
+  type        = bool
+  default     = true
+}
+
+variable "itsm_platform" {
+  description = "IT Service Management platform (e.g., ServiceNow, JIRA Service Management)"
+  type        = string
+  default     = null
+}
+
+variable "itsm_system_id" {
+  description = "ITSM system identifier ID"
+  type        = string
+  default     = null
+}
+
+variable "itsm_component_id" {
+  description = "ITSM component identifier ID"
+  type        = string
+  default     = null
+}
+
+variable "itsm_instance_id" {
+  description = "ITSM instance identifier ID"
+  type        = string
+  default     = null
 }
