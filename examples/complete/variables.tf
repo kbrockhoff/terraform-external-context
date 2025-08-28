@@ -77,14 +77,14 @@ variable "tag_prefix" {
   default     = "ck-"
 }
 
-variable "itsm_platform" {
-  description = "System for ticketing (i.e. JIRA, SNOW)."
+variable "pm_platform" {
+  description = "System for project management ticketing (i.e. JIRA, SNOW)."
   type        = string
   default     = null
 }
 
-variable "itsm_project_code" {
-  description = "The prefix used on your ITSM Platform tickets."
+variable "pm_project_code" {
+  description = "The prefix used on your project management platform tickets."
   type        = string
   default     = null
 }
@@ -95,11 +95,6 @@ variable "cost_center" {
   default     = null
 }
 
-variable "product" {
-  description = "Identifier for the product or project which created or owns this resource."
-  type        = string
-  default     = null
-}
 
 variable "product_owners" {
   description = "List of email addresses to contact with billing questions."
@@ -134,7 +129,7 @@ variable "availability" {
   }
 }
 
-variable "deployer" {
+variable "managedby" {
   description = "ID of the CI/CD platform or person who last updated the resource."
   type        = string
   default     = null
@@ -195,4 +190,46 @@ variable "source_repo_tags_enabled" {
   description = "Enable source repository tags"
   type        = bool
   default     = true
+}
+
+variable "system_prefixes_enabled" {
+  description = "Enable system prefixes in project management and ITSM tags"
+  type        = bool
+  default     = true
+}
+
+variable "not_applicable_enabled" {
+  description = "Enable N/A tags for null values (when false, omit tags with null values)"
+  type        = bool
+  default     = true
+}
+
+variable "owner_tags_enabled" {
+  description = "Enable owner tags (productowners, codeowners, dataowners)"
+  type        = bool
+  default     = true
+}
+
+variable "itsm_platform" {
+  description = "IT Service Management platform (e.g., ServiceNow, JIRA Service Management)"
+  type        = string
+  default     = null
+}
+
+variable "itsm_system_id" {
+  description = "ITSM system identifier ID"
+  type        = string
+  default     = null
+}
+
+variable "itsm_component_id" {
+  description = "ITSM component identifier ID"
+  type        = string
+  default     = null
+}
+
+variable "itsm_instance_id" {
+  description = "ITSM instance identifier ID"
+  type        = string
+  default     = null
 }

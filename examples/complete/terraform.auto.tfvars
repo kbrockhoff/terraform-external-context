@@ -8,19 +8,22 @@ name              = "complete"
 environment       = "dev"
 environment_name  = "Development"
 tag_prefix        = "ck-"
-itsm_platform     = "JIRA"
-itsm_project_code = "TF"
+pm_platform       = "JIRA"
+pm_project_code   = "TF"
+itsm_platform     = "SNOW"
+itsm_system_id    = "BA12345"
+itsm_component_id = "AS123456"
+itsm_instance_id  = "use1"
 
 # Ownership and governance
 cost_center    = "12345"
-product        = "terraform-context"
 product_owners = ["finance@example.com"]
 code_owners    = ["devops@example.com", "platform@example.com"]
 data_owners    = ["data-governance@example.com"]
 
 # Operational settings
 availability    = "business_hours"
-deployer        = "terraform-complete-example"
+managedby       = "terraform-complete-example"
 deletion_date   = null
 sensitivity     = "confidential"
 data_regs       = ["GDPR", "SOX"]

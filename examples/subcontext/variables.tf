@@ -19,20 +19,3 @@ variable "name" {
     error_message = "Name must be 2-24 characters, lowercase, start with letter."
   }
 }
-
-variable "environment" {
-  description = "Environment identifier (e.g., dev, qaprim, qafo, prod)"
-  type        = string
-  default     = "qaprim"
-
-  validation {
-    condition     = can(regex("^[a-z][a-z0-9-]{1,23}$", var.environment))
-    error_message = "Environment must be 2-24 characters, lowercase, start with letter."
-  }
-}
-
-variable "environment_name" {
-  description = "Human-readable environment name"
-  type        = string
-  default     = "QA Primary"
-}

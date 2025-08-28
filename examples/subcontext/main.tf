@@ -10,7 +10,6 @@ module "primary_context" {
   # Set some additional context values to demonstrate inheritance
   cloud_provider   = "aws"
   environment_type = "Testing"
-  product          = "multi-environment-demo"
   cost_center      = "engineering"
   product_owners   = ["team-platform"]
   code_owners      = ["platform-team"]

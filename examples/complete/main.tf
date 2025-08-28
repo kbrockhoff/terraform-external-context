@@ -9,15 +9,14 @@ module "main" {
   environment              = var.environment
   environment_name         = var.environment_name
   tag_prefix               = var.tag_prefix
-  itsm_platform            = var.itsm_platform
-  itsm_project_code        = var.itsm_project_code
+  pm_platform              = var.pm_platform
+  pm_project_code          = var.pm_project_code
   cost_center              = var.cost_center
-  product                  = var.product
   product_owners           = var.product_owners
   code_owners              = var.code_owners
   data_owners              = var.data_owners
   availability             = var.availability
-  deployer                 = var.deployer
+  managedby                = var.managedby
   deletion_date            = var.deletion_date
   sensitivity              = var.sensitivity
   data_regs                = var.data_regs
@@ -26,4 +25,11 @@ module "main" {
   additional_tags          = var.additional_tags
   additional_data_tags     = var.additional_data_tags
   source_repo_tags_enabled = var.source_repo_tags_enabled
+  system_prefixes_enabled  = var.system_prefixes_enabled
+  not_applicable_enabled   = var.not_applicable_enabled
+  owner_tags_enabled       = var.owner_tags_enabled
+  itsm_platform            = var.itsm_platform
+  itsm_system_id           = var.itsm_system_id
+  itsm_component_id        = var.itsm_component_id
+  itsm_instance_id         = var.itsm_instance_id
 }

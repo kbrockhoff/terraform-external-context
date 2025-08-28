@@ -44,23 +44,31 @@ locals {
     environment              = var.environment == null ? var.context.environment : var.environment
     environment_name         = var.environment_name == null ? var.context.environment_name : var.environment_name
     tag_prefix               = var.tag_prefix == null ? var.context.tag_prefix : var.tag_prefix
+    pm_platform              = var.pm_platform == null ? var.context.pm_platform : var.pm_platform
+    pm_project_code          = var.pm_project_code == null ? var.context.pm_project_code : var.pm_project_code
     itsm_platform            = var.itsm_platform == null ? var.context.itsm_platform : var.itsm_platform
-    itsm_project_code        = var.itsm_project_code == null ? var.context.itsm_project_code : var.itsm_project_code
+    itsm_system_id           = var.itsm_system_id == null ? var.context.itsm_system_id : var.itsm_system_id
+    itsm_component_id        = var.itsm_component_id == null ? var.context.itsm_component_id : var.itsm_component_id
+    itsm_instance_id         = var.itsm_instance_id == null ? var.context.itsm_instance_id : var.itsm_instance_id
     cost_center              = var.cost_center == null ? var.context.cost_center : var.cost_center
-    product                  = var.product == null ? var.context.product : var.product
     product_owners           = var.product_owners == null ? var.context.product_owners : var.product_owners
     code_owners              = var.code_owners == null ? var.context.code_owners : var.code_owners
     data_owners              = var.data_owners == null ? var.context.data_owners : var.data_owners
     availability             = var.availability == null ? var.context.availability : var.availability
-    deployer                 = var.deployer == null ? var.context.deployer : var.deployer
+    availability_values      = var.availability_values
+    managedby                = var.managedby == null ? var.context.managedby : var.managedby
     deletion_date            = var.deletion_date == null ? var.context.deletion_date : var.deletion_date
     sensitivity              = var.sensitivity == null ? var.context.sensitivity : var.sensitivity
+    sensitivity_values       = var.sensitivity_values
     data_regs                = var.data_regs == null ? var.context.data_regs : var.data_regs
     security_review          = var.security_review == null ? var.context.security_review : var.security_review
     privacy_review           = var.privacy_review == null ? var.context.privacy_review : var.privacy_review
     additional_tags          = merge(var.context.additional_tags, var.additional_tags)
     additional_data_tags     = merge(var.context.additional_data_tags, var.additional_data_tags)
     source_repo_tags_enabled = var.source_repo_tags_enabled == null ? var.context.source_repo_tags_enabled : var.source_repo_tags_enabled
+    system_prefixes_enabled  = var.system_prefixes_enabled == null ? var.context.system_prefixes_enabled : var.system_prefixes_enabled
+    not_applicable_enabled   = var.not_applicable_enabled == null ? var.context.not_applicable_enabled : var.not_applicable_enabled
+    owner_tags_enabled       = var.owner_tags_enabled == null ? var.context.owner_tags_enabled : var.owner_tags_enabled
   }
 
   cstr = merge(local.default_constraints, lookup(local.cp_constraints_map, local.input.cloud_provider, {}))
@@ -71,13 +79,31 @@ locals {
   tag_prefix   = local.input.tag_prefix == null ? "" : local.input.tag_prefix
   availability = local.input.availability == null ? "preemptable" : local.input.availability
   sensitivity  = local.input.sensitivity == null ? "confidential" : local.input.sensitivity
-  deployer     = local.input.deployer == null ? "terraform" : local.input.deployer
+  managedby    = local.input.managedby == null ? "terraform" : local.input.managedby
 
-  # Combine ITSM platform and project code
-  itsm_info = local.input.itsm_platform == null && local.input.itsm_project_code == null ? (
-    local.cstr["not_applicable"]
-    ) : (
-    join(local.cstr["tag_delimiter"], compact([local.input.itsm_platform, local.input.itsm_project_code]))
+  # Combine PM platform and project code
+  pm_info = local.input.pm_project_code == null ? null : (
+    join(local.cstr["tag_delimiter"], compact([
+      local.input.system_prefixes_enabled && local.input.pm_platform != null ? local.input.pm_platform : null,
+      local.input.pm_project_code
+    ]))
+  )
+
+  # Individual ITSM IDs with optional platform prefix
+  itsm_system_id = local.input.itsm_system_id == null ? null : (
+    local.input.system_prefixes_enabled && local.input.itsm_platform != null ? (
+      join(local.cstr["tag_delimiter"], [local.input.itsm_platform, local.input.itsm_system_id])
+    ) : local.input.itsm_system_id
+  )
+  itsm_component_id = local.input.itsm_component_id == null ? null : (
+    local.input.system_prefixes_enabled && local.input.itsm_platform != null ? (
+      join(local.cstr["tag_delimiter"], [local.input.itsm_platform, local.input.itsm_component_id])
+    ) : local.input.itsm_component_id
+  )
+  itsm_instance_id = local.input.itsm_instance_id == null ? null : (
+    local.input.system_prefixes_enabled && local.input.itsm_platform != null ? (
+      join(local.cstr["tag_delimiter"], [local.input.itsm_platform, local.input.itsm_instance_id])
+    ) : local.input.itsm_instance_id
   )
 
   # Source repository URL processing
@@ -89,6 +115,9 @@ locals {
       local.source_repo_raw
     )
   ) : ""
+
+  # Source repository commit hash
+  source_commit = local.input.source_repo_tags_enabled ? try(data.external.git_repo[0].result["commit"], "") : ""
 
   # Name prefix generation logic following Brockhoff standards
   # Rule 1: If namespace, name, and environment are provided, join with hyphens in order: namespace-name-environment
@@ -126,28 +155,40 @@ locals {
   sandbox_dt = local.input.environment_type == "Ephemeral" ? formatdate("YYYY-MM-DD", timeadd(timestamp(), local.sandbox_retention_hours)) : "never"
   delete_dt  = local.input.deletion_date == null ? local.sandbox_dt : local.input.deletion_date
 
-  raw_tags = merge({
-    "${local.tag_prefix}product"    = local.input.product == null ? local.cstr["not_applicable"] : local.input.product
+  raw_tags = merge(local.input.cost_center != null || local.input.not_applicable_enabled ? {
     "${local.tag_prefix}costcenter" = local.input.cost_center == null ? local.cstr["not_applicable"] : local.input.cost_center
+    } : {}, local.input.owner_tags_enabled && (length(local.input.product_owners) > 0 || local.input.not_applicable_enabled) ? {
     "${local.tag_prefix}productowners" = length(local.input.product_owners) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.product_owners)
       ) : (
       local.cstr["not_applicable"]
     )
+    } : {}, local.input.owner_tags_enabled && (length(local.input.code_owners) > 0 || local.input.not_applicable_enabled) ? {
     "${local.tag_prefix}codeowners" = length(local.input.code_owners) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.code_owners)
       ) : (
       local.cstr["not_applicable"]
     )
-    "${local.tag_prefix}itsmid"         = local.itsm_info
-    "${local.tag_prefix}environment"    = local.env_name
-    "${local.tag_prefix}availability"   = local.availability
-    "${local.tag_prefix}deployer"       = local.deployer
-    "${local.tag_prefix}deletiondate"   = local.delete_dt
+    } : {}, local.pm_info != null ? {
+    "${local.tag_prefix}projectmgmtid" = local.pm_info
+    } : {}, local.itsm_system_id != null ? {
+    "${local.tag_prefix}systemid" = local.itsm_system_id
+    } : {}, local.itsm_component_id != null ? {
+    "${local.tag_prefix}componentid" = local.itsm_component_id
+    } : {}, local.itsm_instance_id != null ? {
+    "${local.tag_prefix}instanceid" = local.itsm_instance_id
+    } : {}, {
+    "${local.tag_prefix}environment"  = local.env_name
+    "${local.tag_prefix}availability" = local.availability
+    "${local.tag_prefix}managedby"    = local.managedby
+    "${local.tag_prefix}deletiondate" = local.delete_dt
+    }, local.input.security_review != null || local.input.not_applicable_enabled ? {
     "${local.tag_prefix}securityreview" = local.input.security_review == null ? local.cstr["not_applicable"] : local.input.security_review
-    "${local.tag_prefix}privacyreview"  = local.input.privacy_review == null ? local.cstr["not_applicable"] : local.input.privacy_review
-    }, local.input.source_repo_tags_enabled ? {
-    "${local.tag_prefix}sourcerepo" = local.source_repo
+    } : {}, local.input.privacy_review != null || local.input.not_applicable_enabled ? {
+    "${local.tag_prefix}privacyreview" = local.input.privacy_review == null ? local.cstr["not_applicable"] : local.input.privacy_review
+    } : {}, local.input.source_repo_tags_enabled ? {
+    "${local.tag_prefix}sourcerepo"   = local.source_repo
+    "${local.tag_prefix}sourcecommit" = local.source_commit
   } : {}, local.input.additional_tags)
   tag_names = keys(local.raw_tags)
   normalized_tags = { for k in local.tag_names : k =>
@@ -168,17 +209,19 @@ locals {
   # Data tags include data-specific tags plus additional data tags
   raw_data_tags = merge({
     "${local.tag_prefix}sensitivity" = local.sensitivity
+    }, local.input.owner_tags_enabled && (length(local.input.data_owners) > 0 || local.input.not_applicable_enabled) ? {
     "${local.tag_prefix}dataowners" = length(local.input.data_owners) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.data_owners)
       ) : (
       local.cstr["not_applicable"]
     )
+    } : {}, length(local.input.data_regs) > 0 || local.input.not_applicable_enabled ? {
     "${local.tag_prefix}dataregulations" = length(local.input.data_regs) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.data_regs)
       ) : (
       local.cstr["not_applicable"]
     )
-  }, local.input.additional_data_tags)
+  } : {}, local.input.additional_data_tags)
   data_tag_names = keys(local.raw_data_tags)
   normalized_data_tags = { for k in local.data_tag_names : k =>
     replace(
@@ -231,23 +274,31 @@ locals {
     environment              = local.env
     environment_name         = local.env_name
     tag_prefix               = local.tag_prefix
+    pm_platform              = local.input.pm_platform
+    pm_project_code          = local.input.pm_project_code
     itsm_platform            = local.input.itsm_platform
-    itsm_project_code        = local.input.itsm_project_code
+    itsm_system_id           = local.input.itsm_system_id
+    itsm_component_id        = local.input.itsm_component_id
+    itsm_instance_id         = local.input.itsm_instance_id
     cost_center              = local.input.cost_center
-    product                  = local.input.product
     product_owners           = local.input.product_owners
     code_owners              = local.input.code_owners
     data_owners              = local.input.data_owners
     availability             = local.availability
-    deployer                 = local.deployer
+    availability_values      = local.input.availability_values
+    managedby                = local.managedby
     deletion_date            = local.delete_dt
     sensitivity              = local.sensitivity
+    sensitivity_values       = local.input.sensitivity_values
     data_regs                = local.input.data_regs
     security_review          = local.input.security_review
     privacy_review           = local.input.privacy_review
     additional_tags          = local.input.additional_tags
     additional_data_tags     = local.input.additional_data_tags
     source_repo_tags_enabled = local.input.source_repo_tags_enabled
+    system_prefixes_enabled  = local.input.system_prefixes_enabled
+    not_applicable_enabled   = local.input.not_applicable_enabled
+    owner_tags_enabled       = local.input.owner_tags_enabled
   }
 
 }
