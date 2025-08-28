@@ -164,13 +164,13 @@ module "context_no_prefixes" {
   itsm_system_id    = "BA12345"
   itsm_component_id = "AS1234567"
   
-  # Disable system prefixes for shorter tag values
+  # Disable system prefixes for shorter tag values or because only a single system is used so no possible ambiguity
   system_prefixes_enabled = false
 }
 
 # Tags generated:
-# With prefixes:    bc-projectmgmtid = "JIRA API", bc-systemid = "SNOW BA12345"
-# Without prefixes: bc-projectmgmtid = "API",      bc-systemid = "BA12345"
+# With prefixes:    bc-projectmgmtid = "JIRA:API", bc-systemid = "SNOW:BA12345", bc-componentid = "SNOW:AS1234567"
+# Without prefixes: bc-projectmgmtid = "API",      bc-systemid = "BA12345",      bc-componentid = "AS1234567"
 ```
 
 ## Environment Type Configuration
@@ -226,7 +226,7 @@ No modules.
 | <a name="input_availability_values"></a> [availability\_values](#input\_availability\_values) | List of allowed availability values | `list(string)` | <pre>[<br/>  "always_on",<br/>  "business_hours",<br/>  "preemptable"<br/>]</pre> | no |
 | <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Public/private cloud provider [dc, aws, az, gcp, oci, ibm, do, vul, ali, cv]. | `string` | `null` | no |
 | <a name="input_code_owners"></a> [code\_owners](#input\_code\_owners) | List of email addresses to contact for application issue resolution. | `list(string)` | `null` | no |
-| <a name="input_context"></a> [context](#input\_context) | Single object for setting entire context at once.<br/>See description of individual variables for details.<br/>Leave string and numeric variables as `null` to use default value.<br/>Individual variable settings (non-null) override settings in context object,<br/>except for additional\_tags and additional\_data\_tags which are merged. | `any` | <pre>{<br/>  "additional_data_tags": {},<br/>  "additional_tags": {},<br/>  "availability": "preemptable",<br/>  "availability_values": [<br/>    "always_on",<br/>    "business_hours",<br/>    "preemptable"<br/>  ],<br/>  "cloud_provider": "dc",<br/>  "code_owners": [],<br/>  "cost_center": null,<br/>  "data_owners": [],<br/>  "data_regs": [],<br/>  "deletion_date": null,<br/>  "enabled": true,<br/>  "environment": null,<br/>  "environment_name": null,<br/>  "environment_type": "Development",<br/>  "itsm_component_id": null,<br/>  "itsm_instance_id": null,<br/>  "itsm_platform": null,<br/>  "itsm_system_id": null,<br/>  "managedby": "Terraform",<br/>  "name": null,<br/>  "namespace": null,<br/>  "owner_tags_enabled": true,<br/>  "pm_platform": null,<br/>  "pm_project_code": null,<br/>  "privacy_review": null,<br/>  "product_owners": [],<br/>  "security_review": null,<br/>  "sensitivity": "confidential",<br/>  "sensitivity_values": [<br/>    "public",<br/>    "internal",<br/>    "trusted-3rd-party",<br/>    "confidential",<br/>    "highly-confidential",<br/>    "client-classified"<br/>  ],<br/>  "source_repo_tags_enabled": true,<br/>  "system_prefixes_enabled": true,<br/>  "tag_prefix": "bc-"<br/>}</pre> | no |
+| <a name="input_context"></a> [context](#input\_context) | Single object for setting entire context at once.<br/>See description of individual variables for details.<br/>Leave string and numeric variables as `null` to use default value.<br/>Individual variable settings (non-null) override settings in context object,<br/>except for additional\_tags and additional\_data\_tags which are merged. | `any` | <pre>{<br/>  "additional_data_tags": {},<br/>  "additional_tags": {},<br/>  "availability": "preemptable",<br/>  "availability_values": [<br/>    "always_on",<br/>    "business_hours",<br/>    "preemptable"<br/>  ],<br/>  "cloud_provider": "dc",<br/>  "code_owners": [],<br/>  "cost_center": null,<br/>  "data_owners": [],<br/>  "data_regs": [],<br/>  "deletion_date": null,<br/>  "enabled": true,<br/>  "environment": null,<br/>  "environment_name": null,<br/>  "environment_type": "Development",<br/>  "itsm_component_id": null,<br/>  "itsm_instance_id": null,<br/>  "itsm_platform": null,<br/>  "itsm_system_id": null,<br/>  "managedby": "Terraform",<br/>  "name": null,<br/>  "namespace": null,<br/>  "not_applicable_enabled": true,<br/>  "owner_tags_enabled": true,<br/>  "pm_platform": null,<br/>  "pm_project_code": null,<br/>  "privacy_review": null,<br/>  "product_owners": [],<br/>  "security_review": null,<br/>  "sensitivity": "confidential",<br/>  "sensitivity_values": [<br/>    "public",<br/>    "internal",<br/>    "trusted-3rd-party",<br/>    "confidential",<br/>    "highly-confidential",<br/>    "client-classified"<br/>  ],<br/>  "source_repo_tags_enabled": true,<br/>  "system_prefixes_enabled": true,<br/>  "tag_prefix": "bc-"<br/>}</pre> | no |
 | <a name="input_cost_center"></a> [cost\_center](#input\_cost\_center) | Cost center this resource should be billed to. | `string` | `null` | no |
 | <a name="input_data_owners"></a> [data\_owners](#input\_data\_owners) | List of email addresses to contact for data governance issues. | `list(string)` | `null` | no |
 | <a name="input_data_regs"></a> [data\_regs](#input\_data\_regs) | List of regulations which resource data must comply with. | `list(string)` | `null` | no |
@@ -242,6 +242,7 @@ No modules.
 | <a name="input_managedby"></a> [managedby](#input\_managedby) | ID of the CI/CD platform or person who last updated the resource. | `string` | `null` | no |
 | <a name="input_name"></a> [name](#input\_name) | Unique name within that particular hierarchy level and resource type. | `string` | `null` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace which could be an organization, business unit, or other grouping. | `string` | `null` | no |
+| <a name="input_not_applicable_enabled"></a> [not\_applicable\_enabled](#input\_not\_applicable\_enabled) | Enable N/A tags for null values (when false, omit tags with null values) | `bool` | `true` | no |
 | <a name="input_owner_tags_enabled"></a> [owner\_tags\_enabled](#input\_owner\_tags\_enabled) | Enable owner tags (productowners, codeowners, dataowners) | `bool` | `true` | no |
 | <a name="input_pm_platform"></a> [pm\_platform](#input\_pm\_platform) | System for project management ticketing (i.e. JIRA, SNOW). | `string` | `null` | no |
 | <a name="input_pm_project_code"></a> [pm\_project\_code](#input\_pm\_project\_code) | The prefix used on your project management platform tickets. | `string` | `null` | no |

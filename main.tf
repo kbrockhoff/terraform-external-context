@@ -67,6 +67,7 @@ locals {
     additional_data_tags     = merge(var.context.additional_data_tags, var.additional_data_tags)
     source_repo_tags_enabled = var.source_repo_tags_enabled == null ? var.context.source_repo_tags_enabled : var.source_repo_tags_enabled
     system_prefixes_enabled  = var.system_prefixes_enabled == null ? var.context.system_prefixes_enabled : var.system_prefixes_enabled
+    not_applicable_enabled   = var.not_applicable_enabled == null ? var.context.not_applicable_enabled : var.not_applicable_enabled
     owner_tags_enabled       = var.owner_tags_enabled == null ? var.context.owner_tags_enabled : var.owner_tags_enabled
   }
 
@@ -81,11 +82,9 @@ locals {
   managedby    = local.input.managedby == null ? "terraform" : local.input.managedby
 
   # Combine PM platform and project code
-  pm_info = local.input.pm_platform == null && local.input.pm_project_code == null ? (
-    null
-    ) : (
+  pm_info = local.input.pm_project_code == null ? null : (
     join(local.cstr["tag_delimiter"], compact([
-      local.input.system_prefixes_enabled ? local.input.pm_platform : null,
+      local.input.system_prefixes_enabled && local.input.pm_platform != null ? local.input.pm_platform : null,
       local.input.pm_project_code
     ]))
   )
@@ -156,14 +155,15 @@ locals {
   sandbox_dt = local.input.environment_type == "Ephemeral" ? formatdate("YYYY-MM-DD", timeadd(timestamp(), local.sandbox_retention_hours)) : "never"
   delete_dt  = local.input.deletion_date == null ? local.sandbox_dt : local.input.deletion_date
 
-  raw_tags = merge({
+  raw_tags = merge(local.input.cost_center != null || local.input.not_applicable_enabled ? {
     "${local.tag_prefix}costcenter" = local.input.cost_center == null ? local.cstr["not_applicable"] : local.input.cost_center
-    }, local.input.owner_tags_enabled ? {
+    } : {}, local.input.owner_tags_enabled && (length(local.input.product_owners) > 0 || local.input.not_applicable_enabled) ? {
     "${local.tag_prefix}productowners" = length(local.input.product_owners) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.product_owners)
       ) : (
       local.cstr["not_applicable"]
     )
+    } : {}, local.input.owner_tags_enabled && (length(local.input.code_owners) > 0 || local.input.not_applicable_enabled) ? {
     "${local.tag_prefix}codeowners" = length(local.input.code_owners) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.code_owners)
       ) : (
@@ -178,13 +178,15 @@ locals {
     } : {}, local.itsm_instance_id != null ? {
     "${local.tag_prefix}instanceid" = local.itsm_instance_id
     } : {}, {
-    "${local.tag_prefix}environment"    = local.env_name
-    "${local.tag_prefix}availability"   = local.availability
-    "${local.tag_prefix}managedby"      = local.managedby
-    "${local.tag_prefix}deletiondate"   = local.delete_dt
+    "${local.tag_prefix}environment"  = local.env_name
+    "${local.tag_prefix}availability" = local.availability
+    "${local.tag_prefix}managedby"    = local.managedby
+    "${local.tag_prefix}deletiondate" = local.delete_dt
+    }, local.input.security_review != null || local.input.not_applicable_enabled ? {
     "${local.tag_prefix}securityreview" = local.input.security_review == null ? local.cstr["not_applicable"] : local.input.security_review
-    "${local.tag_prefix}privacyreview"  = local.input.privacy_review == null ? local.cstr["not_applicable"] : local.input.privacy_review
-    }, local.input.source_repo_tags_enabled ? {
+    } : {}, local.input.privacy_review != null || local.input.not_applicable_enabled ? {
+    "${local.tag_prefix}privacyreview" = local.input.privacy_review == null ? local.cstr["not_applicable"] : local.input.privacy_review
+    } : {}, local.input.source_repo_tags_enabled ? {
     "${local.tag_prefix}sourcerepo"   = local.source_repo
     "${local.tag_prefix}sourcecommit" = local.source_commit
   } : {}, local.input.additional_tags)
@@ -207,19 +209,19 @@ locals {
   # Data tags include data-specific tags plus additional data tags
   raw_data_tags = merge({
     "${local.tag_prefix}sensitivity" = local.sensitivity
-    }, local.input.owner_tags_enabled ? {
+    }, local.input.owner_tags_enabled && (length(local.input.data_owners) > 0 || local.input.not_applicable_enabled) ? {
     "${local.tag_prefix}dataowners" = length(local.input.data_owners) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.data_owners)
       ) : (
       local.cstr["not_applicable"]
     )
-    } : {}, {
+    } : {}, length(local.input.data_regs) > 0 || local.input.not_applicable_enabled ? {
     "${local.tag_prefix}dataregulations" = length(local.input.data_regs) > 0 ? (
       join(local.cstr["tag_delimiter"], local.input.data_regs)
       ) : (
       local.cstr["not_applicable"]
     )
-  }, local.input.additional_data_tags)
+  } : {}, local.input.additional_data_tags)
   data_tag_names = keys(local.raw_data_tags)
   normalized_data_tags = { for k in local.data_tag_names : k =>
     replace(
@@ -295,6 +297,7 @@ locals {
     additional_data_tags     = local.input.additional_data_tags
     source_repo_tags_enabled = local.input.source_repo_tags_enabled
     system_prefixes_enabled  = local.input.system_prefixes_enabled
+    not_applicable_enabled   = local.input.not_applicable_enabled
     owner_tags_enabled       = local.input.owner_tags_enabled
   }
 

@@ -51,6 +51,7 @@ variable "context" {
     additional_data_tags     = {}
     source_repo_tags_enabled = true
     system_prefixes_enabled  = true
+    not_applicable_enabled   = true
     owner_tags_enabled       = true
   }
 
@@ -309,6 +310,12 @@ variable "source_repo_tags_enabled" {
 
 variable "system_prefixes_enabled" {
   description = "Enable system prefixes in project management and ITSM tags"
+  type        = bool
+  default     = true
+}
+
+variable "not_applicable_enabled" {
+  description = "Enable N/A tags for null values (when false, omit tags with null values)"
   type        = bool
   default     = true
 }

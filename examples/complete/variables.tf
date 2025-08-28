@@ -198,6 +198,12 @@ variable "system_prefixes_enabled" {
   default     = true
 }
 
+variable "not_applicable_enabled" {
+  description = "Enable N/A tags for null values (when false, omit tags with null values)"
+  type        = bool
+  default     = true
+}
+
 variable "owner_tags_enabled" {
   description = "Enable owner tags (productowners, codeowners, dataowners)"
   type        = bool

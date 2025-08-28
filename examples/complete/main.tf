@@ -26,6 +26,7 @@ module "main" {
   additional_data_tags     = var.additional_data_tags
   source_repo_tags_enabled = var.source_repo_tags_enabled
   system_prefixes_enabled  = var.system_prefixes_enabled
+  not_applicable_enabled   = var.not_applicable_enabled
   owner_tags_enabled       = var.owner_tags_enabled
   itsm_platform            = var.itsm_platform
   itsm_system_id           = var.itsm_system_id
