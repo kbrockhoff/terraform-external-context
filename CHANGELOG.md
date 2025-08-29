@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.0](https://github.com/kbrockhoff/terraform-external-context/compare/v0.1.0...v0.2.0) (2025-08-29)
+
+
+### Features
+
+* add AI metadata and improve documentation ([a71e63d](https://github.com/kbrockhoff/terraform-external-context/commit/a71e63dad056bb21684d14ebde354e738dd05a54))
+* add not_applicable_enabled variable for conditional tag generation ([de6c539](https://github.com/kbrockhoff/terraform-external-context/commit/de6c5399734574001254fbe354e00de88c9caeb7))
+* enhance tagging system with flexible PM/ITSM integration ([ac45787](https://github.com/kbrockhoff/terraform-external-context/commit/ac45787f55908b7b0a534be6fee0f1c2e72fb5d4))
+
 ## 0.1.0 (2025-08-09)
 
 
