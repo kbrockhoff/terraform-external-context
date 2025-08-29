@@ -1,4 +1,4 @@
-# Brockhof Cloud Context Terraform Module Guide for AI Agents
+# Brockhoff Cloud Context Terraform Module Guide for AI Agents
 
 What the goal of this module is.
 
@@ -10,7 +10,7 @@ What the goal of this module is.
 - Support AWS, Azure, and GCP naming and tagging conventions
 
 ### Naming
-- Name prefix compilies with the Brockhoff Terraform module standard expected by all modules.
+- Name prefix complies with the Brockhoff Terraform module standard expected by all modules.
   - Regex: `/^[a-z][a-z0-9-]{0,22}[a-z0-9]$/`
 - Name can be inputted one of two ways:
   - `namespace`, `name`, and `environment` variables joined with a hyphen.
