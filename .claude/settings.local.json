@@ -4,5 +4,13 @@
       "Bash(make:*)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "sequential-thinking",
+    "filesystem",
+    "git",
+    "context7",
+    "pieces"
+  ],
+  "enableAllProjectMcpServers": true
 }

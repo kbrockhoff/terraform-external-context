@@ -38,6 +38,10 @@
         "@upstash/context7-mcp"
       ],
       "type": "stdio"
+    },
+    "pieces": {
+      "url": "http://localhost:39300/model_context_protocol/2024-11-05/sse",
+      "type": "remote"
     }
   }
 }
