@@ -10,7 +10,7 @@ What the goal of this module is.
 ## Components
 
 ### Context
-- Provides name prefix standardization with output value named `named_prefix`
+- Provides name prefix standardization with output value named `name_prefix`
 - Provides standardized/consistent tags/labels with output values named `tags` and `data_tags`
 - Support AWS, Azure, and GCP naming and tagging conventions
 
