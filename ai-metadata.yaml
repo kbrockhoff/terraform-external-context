@@ -1,0 +1,365 @@
+---
+# AI Agent Metadata for Brockhoff Cloud Context Terraform Module
+# This file provides guidance and templates for AI agents using this module
+
+metadata:
+  name: terraform-external-context
+  description: Terraform module for standardized resource naming and tagging across AWS, Azure, and GCP
+  version: "1.0.0"
+  type: terraform-module
+  provider_requirements:
+    - aws
+    - azure
+    - gcp
+  primary_outputs:
+    - name_prefix: "24-character standardized resource name prefix"
+    - tags: "Cloud provider-specific tags for general resources"
+    - data_tags: "Cloud provider-specific tags for data storage resources"
+
+usage_instructions:
+  purpose: |
+    This module provides standardized naming conventions and tagging for cloud resources. 
+    The default configuration aligns with Brockhoff Cloud Platform standards, but can be customized for your organization.
+  
+  implementation_approaches:
+    direct_usage:
+      description: "Use this module as-is and configure parameters to match your organization's standards"
+      when: "Fastest way to get started with minimal setup"
+      recommended: true
+    
+    fork_and_customize:
+      description: "Clone this repository and modify the naming format and required tags"
+      when: "Organizations with strict naming conventions that differ from defaults"
+      benefit: "Maintains core cloud provider transformations while adapting to specific requirements"
+  
+  when_to_use:
+    - Creating new cloud resources that need consistent naming
+    - Standardizing tags across multiple environments
+    - Implementing governance and compliance requirements
+    - Managing multi-cloud deployments with consistent conventions
+  
+  architecture_patterns:
+    single_instance:
+      description: "Use one instance of this module per deployable stack"
+      benefit: "Provides consistent name prefixes and tags across all resources and modules"
+    
+    environment_configuration:
+      description: "Set context values that vary by environment using variables"
+      example: "environment, environment_type, itsm_instance_id"
+    
+    static_configuration:
+      description: "Hard-code values that remain constant across all environments"
+      example: "namespace, cost_center, code_owners"
+    
+    context_inheritance:
+      description: "Leverage context inheritance when multiple contexts are needed in a single stack"
+      use_case: "Multi-region deployments, DR configurations"
+  
+  key_decisions:
+    naming_approach:
+      option_1:
+        description: "Use namespace + name + environment combination"
+        when: "Organization has clear namespace and environment conventions"
+        example: |
+          namespace   = "myorg"
+          name        = "webapp" 
+          environment = "prod"
+          # Results in: myorg-webapp-prod
+      
+      option_2:
+        description: "Use single name variable only"
+        when: "Simple naming or namespace/environment not needed"
+        example: |
+          name = "my-application"
+          # Results in: my-application
+    
+    environment_types:
+      description: "Choose based on deployment stage and requirements"
+      mapping:
+        Ephemeral: "Temporary environments, CI/CD pipelines"
+        Development: "Developer workspaces"
+        Testing: "Automated testing environments"
+        UAT: "User acceptance testing"
+        Production: "Live production systems"
+        MissionCritical: "Critical production with maximum reliability"
+
+code_templates:
+  basic_usage: |
+    module "context" {
+      source = "kbrockhoff/context/external"
+      
+      # Simple name-only approach
+      cloud_provider = "azure"
+      name           = "app-one-dev"
+    }
+    
+    # Use the context outputs in other resources
+    resource "azurerm_resource_group" "appone" {
+      name     = module.context.name_prefix
+      location = "West Europe"
+      tags     = module.context.tags
+    }
+    
+    resource "azurerm_virtual_network" "main" {
+      name                = "${module.context.name_prefix}-network"
+      address_space       = ["10.0.0.0/16"]
+      location            = azurerm_resource_group.appone.location
+      resource_group_name = azurerm_resource_group.appone.name
+      tags                = module.context.tags
+    }
+  
+  complete_usage: |
+    module "context" {
+      source = "kbrockhoff/context/external"
+      
+      # Core identification
+      cloud_provider    = "aws"
+      namespace         = "myorg"
+      name              = "webapp"
+      environment       = var.environment
+      environment_name  = var.environment_name
+      environment_type  = var.environment_type
+      
+      # Governance and compliance
+      cost_center       = "engineering"
+      product_owners    = ["product@example.com"]
+      code_owners       = ["platform@example.com", "webapp-team@example.com"]
+      data_owners       = ["data-governance@example.com"]
+      
+      # Operational settings
+      availability      = "always_on"
+      sensitivity       = "confidential"
+      data_regs         = ["GDPR", "SOX"]
+      security_review   = "2024-01-15"
+      privacy_review    = "2024-01-15"
+      
+      # Project management integration
+      pm_platform       = "JIRA"
+      pm_project_code   = "WEB"
+      
+      # ITSM integration
+      itsm_platform     = "ServiceNow"
+      itsm_system_id    = "SYS001"
+      itsm_component_id = "COMP001"
+      itsm_instance_id  = var.itsm_instance_id
+      
+      # Additional custom tags
+      additional_tags = {
+        Team          = "Platform Engineering"
+        CostOptimized = "true"
+      }
+      
+      additional_data_tags = {
+        DataClassification = "Confidential"
+        RetentionPeriod    = "7years"
+      }
+    }
+    
+    # Example usage with multiple resource types
+    resource "aws_s3_bucket" "data" {
+      bucket = "${module.context.name_prefix}-data"
+      tags   = merge(module.context.tags, module.context.data_tags)  # Use both regular tags and data_tags for data storage
+    }
+    
+    resource "aws_s3_object" "data" {
+      bucket = aws_s3_bucket.data.id
+      key    = "new_object_key"
+      source = "path/to/file"
+      tags   = module.context.data_tags  # Use data_tags only to stay below 10 tag limit
+    }
+    
+    resource "aws_lambda_function" "processor" {
+      function_name = "${module.context.name_prefix}-processor"
+      
+      tags = module.context.tags  # Use regular tags for compute resources
+    }
+  
+  context_inheritance: |
+    # Base context for all environments
+    module "base_context" {
+      source = "kbrockhoff/context/external"
+      
+      namespace        = "myorg"
+      name             = "api"
+      cost_center      = "engineering"
+      code_owners      = ["team@example.com"]
+    }
+    
+    # Production environment
+    module "prod_context" {
+      source = "kbrockhoff/context/external"
+      
+      context          = module.base_context.context
+      environment      = "prod"
+      environment_type = "Production"
+      availability     = "always_on"
+    }
+    
+    # Development environment
+    module "dev_context" {
+      source = "kbrockhoff/context/external"
+      
+      context          = module.base_context.context
+      environment      = "dev"
+      environment_type = "Development"
+      availability     = "business_hours"
+    }
+  
+  data_resource_tagging: |
+    # Use both regular tags and data_tags for storage resources
+    resource "aws_s3_bucket" "data" {
+      bucket = "${module.context.name_prefix}-data"
+      tags   = merge(module.context.tags, module.context.data_tags)
+    }
+    
+    resource "aws_rds_cluster" "database" {
+      cluster_identifier = "${module.context.name_prefix}-db"
+      tags               = merge(module.context.tags, module.context.data_tags)
+    }
+    
+    # Use regular tags for compute/network resources
+    resource "aws_lambda_function" "processor" {
+      function_name = "${module.context.name_prefix}-fn"
+      tags          = module.context.tags
+    }
+
+    # Use data_tags only for data objects
+    resource "aws_s3_object" "data" {
+      bucket = aws_s3_bucket.data.id
+      key    = "new_object_key"
+      source = "path/to/file"
+      tags   = module.context.data_tags
+    }
+
+validation_checks:
+  name_prefix:
+    - "Must match regex: /^[a-z][a-z0-9-]{0,22}[a-z0-9]$/"
+    - "Maximum 24 characters"
+    - "Lowercase letters, numbers, and hyphens only"
+    - "Must start with letter, end with letter or number"
+  
+  required_decisions:
+    - "Choose naming approach: namespace+name+environment OR name-only"
+    - "Select appropriate environment_type for deployment stage"
+    - "Determine if data_tags or regular tags should be used"
+  
+  cloud_provider_specifics:
+    aws:
+      - "Tags are key-value pairs"
+      - "Maximum 50 tags per resource"
+      - "Tag keys up to 128 characters"
+    azure:
+      - "Tags are key-value pairs"
+      - "Maximum 50 tags per resource"
+      - "Tag names up to 512 characters"
+    gcp:
+      - "Labels are key-value pairs"
+      - "Maximum 64 labels per resource"
+      - "Keys must be lowercase, 63 char max"
+
+common_patterns:
+  multi_environment: |
+    # Use locals for environment configuration
+    locals {
+      environments = {
+        dev = {
+          environment_type = "Development"
+          availability    = "business_hours"
+        }
+        staging = {
+          environment_type = "UAT"
+          availability    = "business_hours"
+        }
+        prod = {
+          environment_type = "Production"
+          availability    = "always_on"
+        }
+      }
+    }
+    
+    module "context" {
+      source = "kbrockhoff/context/external"
+      
+      namespace        = "myorg"
+      name             = "webapp"
+      environment      = var.environment
+      environment_type = local.environments[var.environment].environment_type
+      availability     = local.environments[var.environment].availability
+    }
+  
+  conditional_tagging: |
+    module "context" {
+      source = "kbrockhoff/context/external"
+      
+      name = var.application_name
+      
+      # Conditionally add ITSM tags only in production
+      itsm_platform     = var.environment == "prod" ? "ServiceNow" : null
+      itsm_system_id    = var.environment == "prod" ? var.itsm_system_id : null
+      itsm_component_id = var.environment == "prod" ? var.itsm_component_id : null
+      
+      # Disable N/A tags in production for cleaner output
+      not_applicable_enabled = var.environment != "prod"
+    }
+
+troubleshooting:
+  common_issues:
+    - issue: "Name prefix exceeds 24 characters"
+      solution: "Module automatically truncates to fit limit while maintaining uniqueness"
+    
+    - issue: "Tags not appearing on resources"
+      solution: "Ensure using correct output (tags vs data_tags) and cloud provider supports tagging for resource type"
+    
+    - issue: "Tag values contain invalid characters"
+      solution: "Module automatically normalizes tag values, replacing invalid characters with hyphens"
+    
+    - issue: "Need different tag keys for specific cloud provider"
+      solution: "Module handles provider-specific transformations automatically based on cloud_provider input"
+
+best_practices:
+  - "Single Instance Pattern: Use one instance of this module per deployable stack for consistent naming and tags"
+  - "Environment Configuration: Set context values that vary by environment (dev/staging/prod) using variables"
+  - "Static Configuration: Hard-code values that remain constant across all environments"
+  - "Context Inheritance: Leverage inheritance features when multiple contexts are needed in a single stack"
+  - "Set environment_type appropriately for automatic configuration defaults"
+  - "Data Resource Tagging: Use merge(tags, data_tags) for buckets/databases, data_tags only for objects with tag limits"
+  - "Leverage system_prefixes_enabled when using multiple PM/ITSM platforms"
+  - "Include cost_center and owner emails for proper governance"
+  - "Use additional_tags sparingly - prefer module's built-in variables"
+  - "Test tag generation with 'terraform plan' before applying"
+
+migration_guide:
+  from_manual_tagging: |
+    # Step 1: Identify existing tag patterns
+    # Step 2: Map to module variables
+    # Step 3: Use additional_tags for custom tags not covered by module
+    # Step 4: Gradually migrate resources to use module outputs
+    
+    # Example migration
+    # Old approach:
+    resource "aws_instance" "example" {
+      tags = {
+        Name        = "myapp-prod-web"
+        Environment = "production"
+        Team        = "platform"
+        CostCenter  = "engineering"
+      }
+    }
+    
+    # New approach:
+    module "context" {
+      source = "kbrockhoff/context/external"
+      
+      namespace    = "myapp"
+      name         = "web"
+      environment  = "prod"
+      cost_center  = "engineering"
+      
+      additional_tags = {
+        Team = "platform"
+      }
+    }
+    
+    resource "aws_instance" "example" {
+      tags = module.context.tags
+    }

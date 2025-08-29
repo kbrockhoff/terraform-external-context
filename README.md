@@ -17,6 +17,27 @@ names.
 
 ## Usage
 
+This module provides standardized naming conventions and tagging for cloud resources. The default configuration aligns with Brockhoff Cloud Platform standards, but can be customized for your organization.
+
+### Implementation Approaches
+
+Choose one of these two approaches based on your needs:
+
+1. **Direct Usage** (Recommended)
+   - Use this module as-is and configure parameters to match your organization's standards
+   - Fastest way to get started with minimal setup
+2. **Fork and Customize**
+   - Clone this repository and modify the naming format and required tags
+   - Maintains the core cloud provider transformations while adapting to your specific requirements
+   - Best for organizations with strict naming conventions
+
+### Best Practices
+
+- **Single Instance Pattern:** Use one instance of this module per deployable stack to provide consistent name prefixes and tags across all resources and modules
+- **Environment Configuration:** Set context values that vary by environment (dev/staging/prod) using variables
+- **Static Configuration:** Hard-code values that remain constant across all environments
+- **Context Inheritance:** When multiple contexts are needed in a single stack, leverage the module's context inheritance features
+
 ### Basic Example
 
 ```hcl
@@ -24,15 +45,25 @@ module "context" {
   source = "kbrockhoff/context/external"
 
   # Simple name-only approach
-  name = "my-app"
+  cloud_provider = "azure"
+  name           = "app-one-dev"
 }
 
 # Use the context outputs in other resources
-resource "aws_s3_bucket" "example" {
-  bucket = "${module.context.name_prefix}-data"
-  
-  tags = module.context.tags
+resource "azurerm_resource_group" "appone" {
+  name     = module.context.name_prefix
+  location = "West Europe"
+  tags     = module.context.tags
 }
+
+resource "azurerm_virtual_network" "main" {
+  name                = "${module.context.name_prefix}-network"
+  address_space       = ["10.0.0.0/16"]
+  location            = azurerm_resource_group.appone.location
+  resource_group_name = azurerm_resource_group.appone.name
+  tags                = module.context.tags
+}
+
 ```
 
 ### Complete Example
@@ -45,9 +76,9 @@ module "context" {
   cloud_provider    = "aws"
   namespace         = "myorg"
   name              = "webapp"
-  environment       = "prod"
-  environment_name  = "Production"
-  environment_type  = "Production"
+  environment       = var.environment
+  environment_name  = var.environment_name
+  environment_type  = var.environment_type
 
   # Governance and compliance
   cost_center       = "engineering"
@@ -70,7 +101,7 @@ module "context" {
   itsm_platform     = "ServiceNow"
   itsm_system_id    = "SYS001"
   itsm_component_id = "COMP001"
-  itsm_instance_id  = "INST001"
+  itsm_instance_id  = var.itsm_instance_id
 
   # Additional custom tags
   additional_tags = {
@@ -87,7 +118,14 @@ module "context" {
 # Example usage with multiple resource types
 resource "aws_s3_bucket" "data" {
   bucket = "${module.context.name_prefix}-data"
-  tags   = module.context.data_tags  # Use data_tags for data storage
+  tags   = merge(module.context.tags, module.context.data_tags)  # Use both regular tags and data_tags for data storage
+}
+
+resource "aws_s3_object" "data" {
+  bucket = aws_s3_bucket.data.id
+  key    = "new_object_key"
+  source = "path/to/file"
+  tags   = module.context.data_tags  # Use data_tags only to stay below 10 tag limit
 }
 
 resource "aws_lambda_function" "processor" {
